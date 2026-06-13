@@ -20,6 +20,8 @@ function proceduralEarthMaterial() {
 }
 
 export function earthMesh(radius = 8, animated, state) {
+  const earthAngularSpeed = Math.PI * 2 / 240;
+  const cloudAngularSpeed = Math.PI * 2 / 200;
   const geo = new THREE.SphereGeometry(radius, 128, 128);
   const material = proceduralEarthMaterial();
   const earth = new THREE.Group();
@@ -86,8 +88,8 @@ export function earthMesh(radius = 8, animated, state) {
     // Keep the procedural cloud shader if the optional cloud texture is unavailable.
   });
   earth.userData.tick = (t) => {
-    surface.rotation.y = -1.35 + t * 0.05;
-    clouds.rotation.y = -1.28 + t * 0.062;
+    surface.rotation.y = -1.35 + t * earthAngularSpeed;
+    clouds.rotation.y = -1.28 + t * cloudAngularSpeed;
     if (state.activeSun) sunDir.copy(state.activeSun.getWorldPosition(new THREE.Vector3())).normalize();
     if (surface.material.uniforms?.time) surface.material.uniforms.time.value = t;
     if (surface.material.uniforms?.uSunDir) surface.material.uniforms.uSunDir.value.copy(sunDir);

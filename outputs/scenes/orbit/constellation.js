@@ -5,6 +5,7 @@ const PLANE_COUNT = 10;
 const SATELLITES_PER_PLANE = 15;
 const WALKER_INCLINATION = 0.925;
 const ORBIT_NORMAL_BASE = new THREE.Vector3(0, 1, 0);
+const TWO_PI = Math.PI * 2;
 
 function orbitalPlaneNormal(inclination, ascendingNode) {
   return ORBIT_NORMAL_BASE.clone()
@@ -113,7 +114,7 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
 export function buildConstellation(scene, R, interactive, animated, satellites, focusOnObject) {
   const shells = [1.06 * R, 1.10 * R, 1.14 * R];
   const middleR = 1.10 * R;
-  const meanSpeed = 0.09 * Math.pow((1.06 * R) / middleR, 1.5);
+  const meanSpeed = TWO_PI / 240;
   const planeGuides = [];
   for (let k = 0; k < PLANE_COUNT; k++) {
     const radius = shells[k % shells.length];

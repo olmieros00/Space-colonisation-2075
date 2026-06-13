@@ -25,7 +25,7 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
 
   buildConstellation(scene, R, interactive, animated, satellites, focusOnObject);
   buildStation(scene, R, interactive, animated, travel);
-  const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject);
+  const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject, camState);
   scene.add(starcloud);
 
   setOrbit(new THREE.Vector3(0, 0, 0), 2.6 * R, 1.02 * R, 6 * R, 0.18, 0.3);

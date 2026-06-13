@@ -53,7 +53,7 @@ function buildGatewayStation(R, animated) {
     hub.add(rib);
   }
   assembly.add(hub);
-  assembly.userData.tick = (t) => { assembly.rotation.z = t * 0.18; };
+  assembly.userData.tick = (t) => { assembly.rotation.z = t * (Math.PI * 2 / 75); };
   animated.push(assembly);
   station.add(assembly);
   return station;
