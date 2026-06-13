@@ -47,9 +47,10 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, inspection massing, habitation silhouettes |
 | orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub |
-| starcloud/index.js | Starcloud first-person scene orchestration, camera setup, UI state |
-| starcloud/structure.js | Walkable deck, collision bounds, central spine, kilometre-scale vista silhouette |
-| starcloud/buildings.js | Habitation building massing and building colliders |
+| starcloud/index.js | Starcloud first-person scene orchestration, 1m scale camera setup, sealed sky and Earth backdrop |
+| starcloud/unit.js | One whitepaper-scale Starcloud unit: 4km spine, solar wings, radiators, compute containers |
+| starcloud/constellation.js | Tiled Starcloud unit field and distant LOD silhouettes stretching to the horizon |
+| starcloud/habitation.js | Walkable glass boulevard, lunar house massing, corridor tubes, collision bounds |
 | starcloud/props.js | Deck crates, antennae, and simple droid scale references |
 
 ### shaders/
@@ -68,7 +69,7 @@ When Starcloud Atlas is focused, `ENTER STRUCTURE` appears above the Earth View 
 
 Starcloud orbit model scale: the ~8 unit footprint represents ~358m, so human-scale references use ~0.0224 units per meter.
 
-Starcloud first-person scene scale: `1 unit = 1 metre`. The walkable district is roughly 300m x 120m, with low-detail solar-array and hull vistas extending kilometres along the structure. `ENTER STRUCTURE` from the focused orbit Starcloud now travels to this scene; `RETURN TO ORBIT` travels back to Earth orbit.
+Starcloud first-person scene scale: `1 unit = 1 metre`. The walkable district is a roughly 400m glass boulevard along a 4km data-center spine, embedded in a tiled field of solar-array units extending tens of kilometres. `ENTER STRUCTURE` from the focused orbit Starcloud travels to this scene; `RETURN TO ORBIT` travels back to Earth orbit.
 
 ## Navigation
 The persistent `MENU` button is visible in every scene and opens the mission panel. Press `M` to toggle the same panel; in pointer-lock scenes this also releases pointer lock. The panel routes to all five destinations: Hub, Orbit, Gateway, Moon, and Starcloud.

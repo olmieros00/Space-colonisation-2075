@@ -21,7 +21,7 @@ This repo is a modular Three.js space-settlement experience. Before editing, use
 | Orbit camera distance | `2.6 * R` |
 | Orbit camera min/max | `1.02 * R` / `6 * R` |
 
-Starcloud also has its own first-person scene with local human scale: `1 unit = 1 metre`. Do not use orbit `R` inside `outputs/scenes/starcloud/`; the deck, buildings, colliders, and vista are metre-scale.
+Starcloud also has its own first-person scene with local human scale: `1 unit = 1 metre`. Do not use orbit `R` inside `outputs/scenes/starcloud/`; the deck, buildings, colliders, and vista are metre-scale. The local scene is based on a 5GW Starcloud unit: a ~4000m compute spine, two ~2000m x 4000m solar wings, edge radiators, and a tiled constellation field extending tens of kilometres.
 
 ## Palette
 - Beskar: `#7a8a9c`
