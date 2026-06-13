@@ -60,8 +60,8 @@ export function loadEarthTextures(onReady) {
 
 export function addLights(scene, state, atmospheric = false) {
   scene.add(new THREE.AmbientLight(0x8ea2b8, atmospheric ? 2.45 : 0.9));
-  const sun = new THREE.DirectionalLight(0xffffff, atmospheric ? 2.5 : 1.8);
-  sun.position.set(22, 34, 28);
+  const sun = new THREE.DirectionalLight(0xffffff, atmospheric ? 2.5 : 1.4);
+  sun.position.set(12, 18, 60);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   scene.add(sun);

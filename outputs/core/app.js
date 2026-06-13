@@ -17,7 +17,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x05070b, 1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.25;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 configureTextureLoading(renderer);

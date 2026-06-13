@@ -55,6 +55,8 @@ export function earthMesh(radius = 8, animated, state) {
     loadPlanetTexture("earth_normal_2048.jpg"),
     loadPlanetTexture("earth_lights_2048.png", { colorSpace: THREE.SRGBColorSpace })
   ]).then(([dayMap, specMap, normalMap, nightMap]) => {
+    dayMap.colorSpace = THREE.SRGBColorSpace;
+    nightMap.colorSpace = THREE.SRGBColorSpace;
     const earthMaterial = new THREE.ShaderMaterial({
       uniforms: {
         dayMap: { value: dayMap },
