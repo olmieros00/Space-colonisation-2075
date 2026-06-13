@@ -45,19 +45,6 @@ export function loadPlanetTexture(file, { colorSpace = null, repeatClouds = fals
   });
 }
 
-export function loadEarthTextures(onReady) {
-  Promise.all([
-    loadPlanetTexture("earth_atmos_2048.jpg", { colorSpace: THREE.SRGBColorSpace }),
-    loadPlanetTexture("earth_specular_2048.jpg"),
-    loadPlanetTexture("earth_normal_2048.jpg"),
-    loadPlanetTexture("earth_lights_2048.png", { colorSpace: THREE.SRGBColorSpace }),
-    loadPlanetTexture("earth_clouds_2048.png", { colorSpace: THREE.SRGBColorSpace, repeatClouds: true }).catch(() => null),
-    loadPlanetTexture("moon_1024.jpg", { colorSpace: THREE.SRGBColorSpace })
-  ]).then(([dayMap, specMap, normalMap, nightMap, cloudsMap, moonMap]) => {
-    onReady({ dayMap, specMap, normalMap, nightMap, cloudsMap, moonMap });
-  }).catch(() => onReady(null));
-}
-
 export function addLights(scene, state, atmospheric = false) {
   scene.add(new THREE.AmbientLight(0x8ea2b8, atmospheric ? 2.45 : 0.9));
   const sun = new THREE.DirectionalLight(0xffffff, atmospheric ? 2.5 : 1.4);
@@ -290,22 +277,4 @@ export function cylinderBetween(a, b, radius, material) {
   mesh.position.copy(a).addScaledVector(dir, 0.5);
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
   return mesh;
-}
-
-export function makeGridTexture(size = 512, cells = 12, base = "#203142", line = "#77a8c9") {
-  const cnv = document.createElement("canvas");
-  cnv.width = size;
-  cnv.height = size;
-  const ctx = cnv.getContext("2d");
-  ctx.fillStyle = base;
-  ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = line;
-  ctx.globalAlpha = 0.58;
-  ctx.lineWidth = 2;
-  for (let i = 0; i <= cells; i++) {
-    const p = (i / cells) * size;
-    ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
-  }
-  return new THREE.CanvasTexture(cnv);
 }

@@ -9,6 +9,13 @@ python3 -m http.server 8765 -d outputs
 
 Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). ES modules require a server; `file://` will not work.
 
+## Root files
+| File | Purpose |
+|---|---|
+| AGENTS.md | Auto-loaded working rules, scale anchors, palette, import-map constraints, anti-bloat rules |
+| README.md | Minimal run instructions for the GitHub repo |
+| scripts/health.mjs | Advisory source scanner: line budgets, duplicate helpers, unused exports, stale UI ids |
+
 ## File map — open ONLY the relevant file for each task
 
 ### core/
@@ -16,7 +23,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 |---|---|
 | app.js | Animation loop, renderer setup, shared state, scene switching |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
-| cinema.js | Original cinematic title cards, crawl copy, hyperspace/projection transition timing |
+| cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
 | materials.js | Shared colour palette, material definitions, labels, stars, texture loading |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
 | ui.js | DOM element refs, mission panel open/close |
@@ -40,6 +47,9 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 
 ## Scale anchor
 `const R = 16` in `core/app.js` is Earth's radius in scene units. Orbit-scene objects are sized as multiples of `R`.
+
+## Deleted / retired files
+- `outputs/interactive-aircraft.html` was a stale duplicate. Use `outputs/index.html`.
 
 ## Starcloud inspection mode
 When Starcloud Atlas is focused, `ENTER STRUCTURE` appears above the Earth View button. It switches the shared orbit camera into a Starcloud-only inspection sub-state with a local pivot on the structure, `near = 0.01`, `far = 200`, and inspection zoom bounds of `0.05` to `3` scene units. `↺ EXIT STRUCTURE` returns to the normal Starcloud focus view; `↺ EARTH VIEW` still resets to the Earth-orbit camera.
