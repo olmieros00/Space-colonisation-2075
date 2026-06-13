@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starbase 2075: GRU Hotel Transit</title>
+  <style>
+    :root {
+      --beskar: #7a8a9c;
+      --charcoal: #1a1d24;
+      --amber: #ff9a3c;
+      --text: #e8e8e0;
+      --panel: rgba(16, 20, 28, 0.78);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #05070b;
+      color: var(--text);
+      font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: crosshair;
+    }
+
+    #hud {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 250px;
+      padding: 11px 15px;
+      border: 1px solid rgba(255, 154, 60, 0.42);
+      background: linear-gradient(90deg, rgba(26, 29, 36, 0.9), rgba(26, 29, 36, 0.54));
+      color: var(--text);
+      font-size: 13px;
+      letter-spacing: 0;
+      backdrop-filter: blur(12px);
+      clip-path: polygon(9% 0, 91% 0, 100% 34%, 93% 100%, 7% 100%, 0 34%);
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    .visor {
+      width: 24px;
+      height: 14px;
+      border: 2px solid var(--amber);
+      border-bottom-width: 5px;
+      clip-path: polygon(0 0, 100% 0, 82% 100%, 18% 100%);
+      filter: drop-shadow(0 0 8px rgba(255, 154, 60, 0.8));
+    }
+
+    #returnBtn, .mission-card, #closePanel {
+      font: 13px "Courier New", monospace;
+      color: var(--text);
+      border: 1px solid rgba(255, 154, 60, 0.55);
+      background: rgba(26, 29, 36, 0.78);
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    #returnBtn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      min-width: 198px;
+      height: 44px;
+      padding: 0 18px;
+      clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+      z-index: 6;
+      display: none;
+    }
+
+    #returnBtn:hover, .mission-card:hover, #closePanel:hover {
+      border-color: var(--amber);
+      background: rgba(255, 154, 60, 0.16);
+      transform: translateY(-1px);
+    }
+
+    #tooltip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, calc(-100% - 18px));
+      min-width: 210px;
+      padding: 10px 14px 12px;
+      border: 1px solid rgba(255, 154, 60, 0.7);
+      background: rgba(10, 13, 18, 0.86);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+      pointer-events: none;
+      opacity: 0;
+      clip-path: polygon(12% 0, 88% 0, 100% 35%, 90% 100%, 10% 100%, 0 35%);
+      filter: drop-shadow(0 0 18px rgba(255, 154, 60, 0.28));
+      z-index: 7;
+    }
+
+    #missionPanel {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.96);
+      width: min(560px, calc(100vw - 32px));
+      padding: 22px;
+      border: 1px solid rgba(255, 154, 60, 0.62);
+      background: rgba(9, 12, 18, 0.88);
+      box-shadow: 0 0 48px rgba(255, 154, 60, 0.16), inset 0 0 38px rgba(122, 138, 156, 0.08);
+      backdrop-filter: blur(18px);
+      clip-path: polygon(10% 0, 90% 0, 100% 24%, 95% 100%, 5% 100%, 0 24%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    #missionPanel.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #missionPanel h2 {
+      margin: 0 0 16px;
+      color: var(--amber);
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mission-card {
+      min-height: 106px;
+      padding: 14px 12px;
+      text-align: left;
+      clip-path: polygon(8% 0, 92% 0, 100% 18%, 94% 100%, 6% 100%, 0 18%);
+    }
+
+    .mission-card strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .mission-card span {
+      color: rgba(232, 232, 224, 0.7);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    #closePanel {
+      display: block;
+      margin: 15px auto 0;
+      height: 34px;
+      padding: 0 18px;
+      clip-path: polygon(12% 0, 88% 0, 100% 50%, 88% 100%, 12% 100%, 0 50%);
+    }
+
+    #welcome {
+      position: fixed;
+      left: 50%;
+      top: 29%;
+      transform: translate(-50%, -50%);
+      width: min(680px, calc(100vw - 34px));
+      color: var(--amber);
+      text-align: center;
+      font-size: clamp(18px, 3vw, 34px);
+      line-height: 1.24;
+      text-shadow: 0 0 18px rgba(255, 154, 60, 0.75), 0 0 46px rgba(255, 154, 60, 0.24);
+      opacity: 0;
+      z-index: 5;
+      pointer-events: none;
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    #welcome.show {
+      opacity: 1;
+      transform: translate(-50%, -62%);
+    }
+
+    #iris {
+      position: fixed;
+      inset: 0;
+      background: #020306;
+      z-index: 20;
+      pointer-events: none;
+      clip-path: circle(0% at 50% 50%);
+    }
+
+    #hint {
+      position: fixed;
+      left: 18px;
+      top: 18px;
+      max-width: 440px;
+      padding: 11px 14px;
+      color: rgba(232, 232, 224, 0.72);
+      border-left: 2px solid rgba(255, 154, 60, 0.58);
+      background: rgba(4, 6, 10, 0.34);
+      font-size: 12px;
+      line-height: 1.45;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    @media (max-width: 760px) {
+      .mission-grid { grid-template-columns: 1fr; }
+      #returnBtn { min-width: 170px; right: 12px; bottom: 12px; }
+      #hud { left: 12px; bottom: 12px; min-width: 210px; }
+      #hint { left: 12px; right: 12px; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div id="hint"></div>
+  <div id="hud"><span class="visor"></span><span id="location">STARBASE TEXAS // 2075</span></div>
+  <button id="returnBtn">RETURN TO STARBASE</button>
+  <div id="tooltip"></div>
+  <div id="welcome">Welcome to the Moon.<br>Galactic Resource Utilization Space.</div>
+  <section id="missionPanel" aria-label="Mission Control">
+    <h2>MISSION CONTROL DOME</h2>
+    <div class="mission-grid">
+      <button class="mission-card" data-dest="orbit"><strong>Launch to Orbit</strong><span>Falcon-heritage Colossus ascent to the AI1 constellation.</span></button>
+      <button class="mission-card" data-dest="gateway"><strong>Lunar Transfer</strong><span>Dock at Gateway Station and stage for Mare Imbrium.</span></button>
+      <button class="mission-card" data-dest="moon"><strong>GRU Hotel — Mare Imbrium</strong><span>Surface arrival at the pit-shielded lunar habitat.</span></button>
+    </div>
+    <button id="closePanel">CLOSE</button>
+  </section>
+  <div id="iris"></div>
+
+  <script type="module">
+    import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js";
+
+    const canvas = document.getElementById("scene");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setClearColor(0x05070b, 1);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2400);
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(9, 9);
+    const clock = new THREE.Clock();
+    const interactive = [];
+    const satellites = [];
+    const animated = [];
+
+    const UI = {
+      location: document.getElementById("location"),
+      hint: document.getElementById("hint"),
+      tooltip: document.getElementById("tooltip"),
+      panel: document.getElementById("missionPanel"),
+      iris: document.getElementById("iris"),
+      welcome: document.getElementById("welcome"),
+      returnBtn: document.getElementById("returnBtn")
+    };
+
+    const C = {
+      beskar: 0x7a8a9c,
+      charcoal: 0x1a1d24,
+      amber: 0xff9a3c,
+      text: 0xe8e8e0,
+      blue: 0x4aa8ff,
+      lunar: 0xa8a8a2
+    };
+    const R = 16;
+
+    let scene = new THREE.Scene();
+    let mode = "hub";
+    let hovered = null;
+    let dragging = false;
+    let down = { x: 0, y: 0 };
+    let dragMoved = false;
+    let orbitYaw = 0.3;
+    let orbitPitch = 0.18;
+    let orbitDistance = 32;
+    let orbitMin = 14;
+    let orbitMax = 70;
+    let orbitTarget = new THREE.Vector3(0, 0, 0);
+    let hotelEntrance = new THREE.Vector3(0, 0, 0);
+    let hubRocket = null;
+    let launching = false;
+
+    const mat = {
+      beskar: new THREE.MeshStandardMaterial({ color: C.beskar, metalness: 0.62, roughness: 0.36 }),
+      dark: new THREE.MeshStandardMaterial({ color: C.charcoal, metalness: 0.34, roughness: 0.62 }),
+      white: new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.42 }),
+      black: new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.5, roughness: 0.36 }),
+      amber: new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.95, transparent: true, opacity: 0.82 }),
+      glass: new THREE.MeshPhysicalMaterial({ color: 0x7cc7ff, metalness: 0, roughness: 0.05, transmission: 0.45, transparent: true, opacity: 0.35 }),
+      regolith: new THREE.MeshStandardMaterial({ color: 0x7f817d, roughness: 0.92 }),
+      cream: new THREE.MeshStandardMaterial({ color: 0xded8c5, roughness: 0.65, metalness: 0.04 })
+    };
+    mat.amber.userData.baseEmissive = C.amber;
+
+    function addLights(s, atmospheric = false) {
+      s.add(new THREE.AmbientLight(0x8ea2b8, atmospheric ? 2.45 : 0.9));
+      const sun = new THREE.DirectionalLight(0xffffff, atmospheric ? 2.5 : 1.8);
+      sun.position.set(22, 34, 28);
+      sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      s.add(sun);
+      const amber = new THREE.PointLight(C.amber, atmospheric ? 1.5 : 0.8, 80);
+      amber.position.set(-12, 8, 10);
+      s.add(amber);
+    }
+
+    function label(text, pos, size = 0.9, color = "#e8e8e0") {
+      const cnv = document.createElement("canvas");
+      cnv.width = 768; cnv.height = 128;
+      const ctx = cnv.getContext("2d");
+      ctx.clearRect(0, 0, cnv.width, cnv.height);
+      ctx.font = "36px Courier New";
+      ctx.fillStyle = "rgba(0,0,0,.45)";
+      ctx.fillRect(0, 16, cnv.width, 74);
+      ctx.strokeStyle = "rgba(255,154,60,.75)";
+      ctx.strokeRect(4, 20, cnv.width - 8, 66);
+      ctx.fillStyle = color;
+      ctx.fillText(text, 26, 66);
+      const texture = new THREE.CanvasTexture(cnv);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false }));
+      sprite.position.copy(pos);
+      sprite.scale.set(size * 6, size, 1);
+      scene.add(sprite);
+      return sprite;
+    }
+
+    function glowRing(radius, tube = 0.035) {
+      return new THREE.Mesh(
+        new THREE.TorusGeometry(radius, tube, 10, 96),
+        new THREE.MeshBasicMaterial({ color: C.amber, transparent: true, opacity: 0.75 })
+      );
+    }
+
+    function addInteractive(obj, name, action, detail = "") {
+      obj.userData.interactive = { name, action, detail };
+      interactive.push(obj);
+      return obj;
+    }
+
+    function makeStars(s) {
+      const pos = [];
+      for (let i = 0; i < 2000; i++) {
+        const r = THREE.MathUtils.randFloat(360, 1150);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
+        pos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      s.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xdce7ff, size: 1.2, sizeAttenuation: false })));
+    }
+
+    function makeParticles(s, count, area, color = 0x8d98a6) {
+      const pos = [];
+      for (let i = 0; i < count; i++) pos.push(THREE.MathUtils.randFloatSpread(area), Math.random() * 7 + 0.2, THREE.MathUtils.randFloatSpread(area));
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      const points = new THREE.Points(geo, new THREE.PointsMaterial({ color, size: 0.055, transparent: true, opacity: 0.42 }));
+      points.userData.tick = (t) => {
+        const a = points.geometry.attributes.position;
+        for (let i = 0; i < a.count; i++) {
+          a.array[i * 3 + 1] -= 0.012 + Math.sin(t + i) * 0.002;
+          if (a.array[i * 3 + 1] < 0) a.array[i * 3 + 1] = Math.random() * 7 + 0.4;
+        }
+        a.needsUpdate = true;
+      };
+      animated.push(points);
+      s.add(points);
+    }
+
+    function setOrbit(target, distance, min, max, pitch, yaw = 0.55) {
+      orbitTarget.copy(target);
+      orbitDistance = distance;
+      orbitMin = min;
+      orbitMax = max;
+      orbitPitch = pitch;
+      orbitYaw = yaw;
+      updateOrbitCamera();
+    }
+
+    function normalizedMouse(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    function earthMesh(radius = 8) {
+      const geo = new THREE.SphereGeometry(radius, 128, 64);
+      const material = new THREE.ShaderMaterial({
+        uniforms: { time: { value: 0 } },
+        vertexShader: "varying vec3 v; varying vec3 wp; void main(){v=normalize(position); vec4 w=modelMatrix*vec4(position,1.0); wp=w.xyz; gl_Position=projectionMatrix*viewMatrix*w;}",
+        fragmentShader: `
+          varying vec3 v; varying vec3 wp; uniform float time;
+          float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+          float noise(vec3 p){
+            vec3 i=floor(p), f=fract(p);
+            f=f*f*(3.0-2.0*f);
+            return mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
+          }
+          float fbm(vec3 p){float v=0.0,a=.5; for(int i=0;i<6;i++){v+=a*noise(p); p=p*2.07+vec3(.6,.2,.9); a*=.5;} return v;}
+          void main(){
+            vec3 p=v*2.0;
+            float warp=fbm(p*1.25+fbm(p*1.9+time*.01));
+            float mask=fbm(p*1.62+warp*2.4);
+            float veg=fbm(p*5.2+warp*1.1);
+            float mountains=fbm(p*12.0+warp*2.0);
+            float land=smoothstep(.515,.565,mask);
+            vec3 ocean=mix(vec3(.039,.176,.322),vec3(.102,.424,.659),smoothstep(.48,.64,mask)+veg*.16);
+            vec3 desert=vec3(.722,.600,.408);
+            vec3 forest=vec3(.227,.420,.220);
+            vec3 mountain=vec3(.420,.384,.345);
+            float lat=abs(v.y);
+            vec3 landColor=mix(forest,desert,smoothstep(.12,.64,lat)+veg*.22);
+            landColor=mix(landColor,mountain,smoothstep(.62,.83,mountains)*land);
+            landColor=mix(landColor,vec3(.96,.97,.94),smoothstep(.78,.88,lat));
+            vec3 c=mix(ocean,landColor,land);
+            c=mix(c,vec3(.98,.99,.96),smoothstep(.78,.88,lat));
+            c*=.76+.36*max(dot(normalize(vec3(-.45,.42,.8)),v),0.0);
+            gl_FragColor=vec4(c,1.0);
+          }`
+      });
+      const earth = new THREE.Group();
+      const surface = new THREE.Mesh(geo, material);
+      const cloudMaterial = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        uniforms: { time: { value: 0 } },
+        vertexShader: "varying vec3 v; void main(){v=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
+        fragmentShader: `
+          varying vec3 v; uniform float time;
+          float hash(vec3 p){return fract(sin(dot(p,vec3(17.1,91.7,47.7)))*43758.5453);}
+          float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+          float fbm(vec3 p){float v=0.0,a=.5; for(int i=0;i<5;i++){v+=a*noise(p); p=p*2.13+vec3(.3,.7,.5); a*=.5;} return v;}
+          void main(){
+            vec3 p=v*5.6+vec3(time*.02,0.,time*.013);
+            float swirl=fbm(p+vec3(fbm(p*1.7),fbm(p*1.9),0.0)*1.6);
+            float wisps=fbm(p*3.0+swirl);
+            float systems=smoothstep(.58,.72,swirl)*smoothstep(.36,.68,wisps);
+            float bands=smoothstep(.35,.95,sin(v.y*18.0+swirl*3.0)*.5+.5);
+            float a=systems*(.22+.34*bands);
+            gl_FragColor=vec4(vec3(.96,.98,1.0),a);
+          }
+        `
+      });
+      const clouds = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.01, 128, 64), cloudMaterial);
+      const atmosphere = new THREE.Mesh(
+        new THREE.SphereGeometry(radius * 1.03, 128, 64),
+        new THREE.ShaderMaterial({
+          transparent: true,
+          side: THREE.BackSide,
+          depthWrite: false,
+          vertexShader: "varying vec3 n; void main(){n=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
+          fragmentShader: "varying vec3 n; void main(){float f=pow(1.0-abs(n.z),3.1); gl_FragColor=vec4(.427,.706,1.0,f*.9);}"
+        })
+      );
+      earth.add(surface, clouds, atmosphere);
+      earth.userData.tick = (t) => {
+        surface.rotation.y = t * 0.05;
+        clouds.rotation.y = t * 0.038;
+        material.uniforms.time.value = t;
+        cloudMaterial.uniforms.time.value = t;
+      };
+      animated.push(earth);
+      return earth;
+    }
+
+    function moonMesh(radius = 4) {
+      const geo = new THREE.SphereGeometry(radius, 48, 24);
+      const material = new THREE.ShaderMaterial({
+        vertexShader: "varying vec3 v; void main(){v=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
+        fragmentShader: "varying vec3 v; void main(){float g=.48+.34*v.y+.1*sin(v.x*22.0)*sin(v.z*18.0); gl_FragColor=vec4(vec3(g),1.0);}"
+      });
+      return new THREE.Mesh(geo, material);
+    }
+
+    function resetScene() {
+      interactive.length = 0;
+      satellites.length = 0;
+      animated.length = 0;
+      hovered = null;
+      hubRocket = null;
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x05070b, 0.016);
+      renderer.setClearColor(0x05070b, 1);
+    }
+
+    function buildRocket() {
+      const g = new THREE.Group();
+      const radius = 0.46;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 11.7, 48), mat.white);
+      body.position.y = 6.15;
+      g.add(body);
+      const fairing = new THREE.Group();
+      const fairingCyl = new THREE.Mesh(new THREE.CylinderGeometry(radius * 1.08, radius * 1.08, 1.05, 48), mat.white);
+      fairingCyl.position.y = 12.55;
+      const fairingCap = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.08, 48, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat.white);
+      fairingCap.position.y = 13.08;
+      fairing.add(fairingCyl, fairingCap);
+      g.add(fairing);
+      for (let i = 0; i < 4; i++) {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.48, 0.35), mat.black);
+        const a = i * Math.PI / 2;
+        fin.position.set(Math.cos(a) * 0.5, 10.85, Math.sin(a) * 0.5);
+        fin.rotation.y = -a;
+        g.add(fin);
+      }
+      for (let i = 0; i < 4; i++) {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.045, 2.15, 0.08), mat.black);
+        const a = i * Math.PI / 2 + Math.PI / 4;
+        leg.position.set(Math.cos(a) * 0.47, 1.25, Math.sin(a) * 0.47);
+        leg.rotation.z = Math.cos(a) * 0.12;
+        leg.rotation.x = Math.sin(a) * -0.12;
+        g.add(leg);
+      }
+      const interstage = new THREE.Mesh(new THREE.CylinderGeometry(radius * 1.02, radius * 1.02, 0.34, 48), mat.black);
+      interstage.position.y = 11.8;
+      g.add(interstage);
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.035, 5.2, 0.035), mat.black);
+      stripe.position.set(0, 6.2, radius + 0.012);
+      g.add(stripe);
+      const octaweb = new THREE.Group();
+      const baseRing = new THREE.Mesh(new THREE.CylinderGeometry(radius * 1.08, radius * 1.08, 0.18, 48), mat.black);
+      baseRing.position.y = 0.2;
+      octaweb.add(baseRing);
+      for (let i = 0; i < 8; i++) {
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.22, 12), mat.black);
+        const a = i * Math.PI / 4;
+        nozzle.position.set(Math.cos(a) * 0.29, 0.02, Math.sin(a) * 0.29);
+        octaweb.add(nozzle);
+      }
+      g.add(octaweb);
+      g.userData.plumeAnchor = octaweb;
+      return g;
+    }
+
+    function buildHub() {
+      resetScene();
+      makeStars(scene);
+      mode = "hub";
+      UI.location.textContent = "STARBASE TEXAS // 2075";
+      UI.returnBtn.style.display = "none";
+      UI.hint.textContent = "Drag to orbit Starbase. Wheel zooms. Hover amber targets. Click Mission Control, the Colossus pad, or mission cards to travel.";
+      addLights(scene, true);
+      renderer.setClearColor(0x11151d, 1);
+      scene.fog = new THREE.FogExp2(0x11151d, 0.012);
+
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(150, 110), new THREE.MeshStandardMaterial({ color: 0x343b46, roughness: 0.88 }));
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      for (let i = -70; i <= 70; i += 10) {
+        const lineA = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 110), mat.beskar);
+        lineA.position.set(i, 0.025, 0);
+        const lineB = new THREE.Mesh(new THREE.BoxGeometry(150, 0.035, 0.035), mat.beskar);
+        lineB.position.set(0, 0.026, i * 0.75);
+        scene.add(lineA, lineB);
+      }
+
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(9.5, 10.5, 0.65, 8), new THREE.MeshStandardMaterial({ color: 0x555b62, roughness: 0.82 }));
+      pad.position.set(-24, 0.25, -2);
+      scene.add(addInteractive(pad, "Launch Complex Colossus", () => travel("orbit"), "Falcon-9-heritage megalaunch pad"));
+      const trench = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.72, 8.4), new THREE.MeshStandardMaterial({ color: 0x101217, roughness: 0.9 }));
+      trench.position.set(-24, 0.52, 2.7);
+      scene.add(trench);
+      const rocket = buildRocket();
+      rocket.position.set(-24, 0.55, -2);
+      hubRocket = rocket;
+      scene.add(rocket);
+      const tower = new THREE.Group();
+      for (let i = 0; i < 8; i++) {
+        const y = 1.3 + i * 1.85;
+        const mast = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.65, 0.32), mat.beskar);
+        mast.position.set(0, y, 0);
+        const crossA = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 0.12), mat.beskar);
+        const crossB = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 2.4), mat.beskar);
+        crossA.position.y = y + 0.62;
+        crossB.position.y = y + 0.62;
+        tower.add(mast, crossA, crossB);
+      }
+      tower.position.set(-18.2, 0, -2.2);
+      scene.add(tower);
+      for (let i = 0; i < 4; i++) {
+        const a = i * Math.PI / 2 + Math.PI / 4;
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 18, 12), mat.white);
+        mast.position.set(-24 + Math.cos(a) * 11.8, 9, -2 + Math.sin(a) * 11.8);
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 8), mat.white);
+        cap.position.set(mast.position.x, 18.2, mast.position.z);
+        scene.add(mast, cap);
+      }
+      label("LAUNCH COMPLEX COLOSSUS", new THREE.Vector3(-24, 16.8, -7), 0.75);
+
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(5.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat.glass);
+      dome.position.set(13, 0.22, -12);
+      scene.add(addInteractive(dome, "Mission Control Dome", () => openPanel(), "Open hub-and-spoke mission panel"));
+      const domeGlow = glowRing(5.55, 0.05);
+      domeGlow.rotation.x = Math.PI / 2;
+      domeGlow.position.copy(dome.position);
+      scene.add(domeGlow);
+      label("MISSION CONTROL DOME", new THREE.Vector3(13, 7.2, -16), 0.66);
+
+      const mech = new THREE.Group();
+      for (let i = 0; i < 9; i++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), mat.beskar);
+        b.position.y = 1.2 + i * 2.2;
+        mech.add(b);
+      }
+      const chopA = new THREE.Mesh(new THREE.BoxGeometry(7, 0.28, 0.34), mat.beskar);
+      const chopB = chopA.clone();
+      chopA.position.set(-3.5, 18.2, -0.55);
+      chopB.position.set(-3.5, 17.3, 0.55);
+      mech.add(chopA, chopB);
+      mech.position.set(29, 0, 13);
+      scene.add(mech);
+      label("MECHAZILLA TOWER", new THREE.Vector3(29, 22, 13), 0.58);
+
+      const hangar = new THREE.Mesh(new THREE.BoxGeometry(24, 4, 10), mat.white);
+      hangar.position.set(-30, 2, 24);
+      const hangarStrip = new THREE.Mesh(new THREE.BoxGeometry(12, 0.18, 0.08), mat.black);
+      hangarStrip.position.set(-30, 3.4, 18.95);
+      scene.add(hangar, hangarStrip);
+      for (let i = 0; i < 10; i++) {
+        const tank = new THREE.Mesh(new THREE.SphereGeometry(1.6, 24, 12), mat.white);
+        tank.scale.y = 0.75;
+        tank.position.set(-45 + i * 4, 1.4, -25);
+        scene.add(tank);
+      }
+      label("CREW QUARTERS & FUEL FARMS", new THREE.Vector3(-28, 5, 25), 0.58);
+      makeParticles(scene, 260, 120, 0xb6bdc4);
+      setOrbit(new THREE.Vector3(0, 4, 0), 64, 30, 110, 0.62, 0.55);
+    }
+
+    function satellite(name, radius, speed, phase, prime = false) {
+      const g = new THREE.Group();
+      const span = (prime ? 0.06 : 0.035) * R;
+      const bodySize = prime ? 0.010 * R : 0.007 * R;
+      const gold = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.9, roughness: 0.3 });
+      const solar = new THREE.MeshStandardMaterial({ color: 0x16294a, emissive: 0x2f5694, emissiveIntensity: 0.4, metalness: 0.28, roughness: 0.42 });
+      const frame = new THREE.MeshStandardMaterial({ color: 0x66778a, metalness: 0.75, roughness: 0.32 });
+      const bodyMat = prime ? mat.amber : gold;
+      const body = new THREE.Mesh(new THREE.BoxGeometry(bodySize, bodySize * 0.82, bodySize), bodyMat);
+      const wings = new THREE.Group();
+      function panelWing(axis = "x", dir = 1) {
+        const wing = new THREE.Group();
+        const panelLen = span * 0.18;
+        const gap = span * 0.012;
+        const panelDepth = span * 0.075;
+        const boomLength = span * 0.48;
+        const boomGeo = axis === "x"
+          ? new THREE.BoxGeometry(boomLength, span * 0.012, span * 0.012)
+          : new THREE.BoxGeometry(span * 0.012, span * 0.012, boomLength);
+        const boom = new THREE.Mesh(boomGeo, frame);
+        if (axis === "x") boom.position.x = dir * boomLength * 0.34;
+        else boom.position.z = dir * boomLength * 0.34;
+        wing.add(boom);
+        for (let i = 0; i < 3; i++) {
+          const offset = bodySize * 1.15 + dir * (i + 0.5) * (panelLen + gap);
+          const panel = new THREE.Mesh(
+            axis === "x"
+              ? new THREE.BoxGeometry(panelLen, span * 0.014, panelDepth)
+              : new THREE.BoxGeometry(panelDepth, span * 0.014, panelLen),
+            solar
+          );
+          if (axis === "x") panel.position.x = offset;
+          else panel.position.z = offset;
+          wing.add(panel);
+          const borderA = new THREE.Mesh(
+            axis === "x"
+              ? new THREE.BoxGeometry(panelLen, span * 0.017, span * 0.006)
+              : new THREE.BoxGeometry(span * 0.006, span * 0.017, panelLen),
+            frame
+          );
+          borderA.position.copy(panel.position);
+          if (axis === "x") borderA.position.z += panelDepth * 0.52;
+          else borderA.position.x += panelDepth * 0.52;
+          wing.add(borderA);
+        }
+        return wing;
+      }
+      wings.add(panelWing("x", 1), panelWing("x", -1));
+      if (prime) {
+        wings.add(panelWing("z", 1), panelWing("z", -1));
+      }
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(span * 0.006, span * 0.006, span * 0.16, 12), frame);
+      arm.rotation.x = Math.PI / 2;
+      arm.position.z = -bodySize * 1.25;
+      const dish = new THREE.Mesh(new THREE.SphereGeometry(prime ? span * 0.12 : span * 0.09, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat.white);
+      dish.rotation.x = Math.PI / 2;
+      dish.position.z = -bodySize * 2.15;
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(span * 0.005, span * 0.005, prime ? span * 0.42 : span * 0.28, 10), frame);
+      mast.position.y = prime ? span * 0.26 : span * 0.18;
+      g.add(body, wings, arm, dish, mast);
+      if (prime) g.scale.setScalar(1.7);
+      g.userData = {
+        radius,
+        speed,
+        phase,
+        prime,
+        inclination: prime ? 0.28 : THREE.MathUtils.randFloat(-0.6, 0.6),
+        ascendingNode: prime ? 1.2 : Math.random() * Math.PI * 2
+      };
+      if (prime) addInteractive(body, name, null, "AI Data Center Node — 150kW peak");
+      satellites.push(g);
+      scene.add(g);
+      return g;
+    }
+
+    function cylinderBetween(a, b, radius, material) {
+      const dir = new THREE.Vector3().subVectors(b, a);
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, dir.length(), 16), material);
+      mesh.position.copy(a).addScaledVector(dir, 0.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      return mesh;
+    }
+
+    function buildGatewayStation() {
+      const station = new THREE.Group();
+      const ringRadius = 0.18 * R;
+      const tubeRadius = 0.022 * R;
+      const ringGap = 0.07 * R;
+      const copper = new THREE.MeshStandardMaterial({ color: 0x7a4a32, metalness: 0.52, roughness: 0.48 });
+      const windowMat = new THREE.MeshBasicMaterial({ color: 0xffe8b0 });
+      const assembly = new THREE.Group();
+
+      for (const z of [-ringGap, ringGap]) {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(ringRadius, tubeRadius, 20, 96), mat.white);
+        ring.position.z = z;
+        assembly.add(ring);
+        for (let i = 0; i < 40; i++) {
+          const a = i * Math.PI * 2 / 40;
+          const exposed = a > Math.PI * 1.45 && a < Math.PI * 1.95;
+          const box = new THREE.Mesh(
+            new THREE.BoxGeometry(0.035 * R, 0.012 * R, 0.035 * R),
+            exposed ? copper : (i % 2 ? mat.beskar : mat.white)
+          );
+          box.position.set(Math.cos(a) * ringRadius, Math.sin(a) * ringRadius, z);
+          box.rotation.z = a;
+          assembly.add(box);
+          if (!exposed && i % 3 === 0) {
+            const light = new THREE.Mesh(new THREE.BoxGeometry(0.012 * R, 0.004 * R, 0.004 * R), windowMat);
+            light.position.set(Math.cos(a) * (ringRadius + tubeRadius * 1.08), Math.sin(a) * (ringRadius + tubeRadius * 1.08), z);
+            light.rotation.z = a;
+            assembly.add(light);
+          }
+          if (exposed) {
+            const inner = new THREE.Vector3(Math.cos(a) * (ringRadius - tubeRadius), Math.sin(a) * (ringRadius - tubeRadius), z);
+            const outer = new THREE.Vector3(Math.cos(a + 0.045) * (ringRadius + tubeRadius), Math.sin(a + 0.045) * (ringRadius + tubeRadius), z);
+            assembly.add(cylinderBetween(inner, outer, 0.0045 * R, copper));
+          }
+        }
+        for (let i = 0; i < 3; i++) {
+          const a = i * Math.PI * 2 / 3 + 0.2;
+          assembly.add(cylinderBetween(new THREE.Vector3(0, 0, z), new THREE.Vector3(Math.cos(a) * ringRadius, Math.sin(a) * ringRadius, z), 0.018 * R, mat.beskar));
+        }
+      }
+
+      const hub = new THREE.Group();
+      for (let i = 0; i < 9; i++) {
+        const rib = new THREE.Mesh(
+          new THREE.CylinderGeometry((0.042 + (i % 2) * 0.012) * R, (0.048 + (i % 2) * 0.012) * R, 0.035 * R, 32),
+          i % 2 ? mat.beskar : mat.white
+        );
+        rib.rotation.x = Math.PI / 2;
+        rib.position.z = (i - 4) * 0.04 * R;
+        hub.add(rib);
+      }
+      assembly.add(hub);
+      assembly.userData.tick = (t) => { assembly.rotation.z = t * 0.18; };
+      animated.push(assembly);
+      station.add(assembly);
+      return station;
+    }
+
+    function buildOrbit() {
+      resetScene();
+      makeStars(scene);
+      mode = "orbit";
+      UI.location.textContent = "EARTH ORBIT // AI1 CONSTELLATION";
+      UI.returnBtn.style.display = "block";
+      UI.hint.textContent = "Drag to orbit the camera. Wheel zooms. Hover AI1 Prime. Click Gateway Station to enter the docking bay.";
+      addLights(scene);
+      scene.fog = null;
+      const earth = earthMesh(R);
+      scene.add(earth);
+      const moon = moonMesh(0.27 * R);
+      moon.position.set(-4 * R, 0.5 * R, -4.5 * R);
+      scene.add(moon);
+      const moonLight = new THREE.PointLight(0xd0d8e8, 0.4, 120);
+      moonLight.position.copy(moon.position);
+      scene.add(moonLight);
+
+      for (let i = 0; i < 150; i++) {
+        const shell = i % 6;
+        const ring = THREE.MathUtils.lerp(1.08 * R, 1.35 * R, shell / 5) + Math.random() * 0.012 * R;
+        satellite("AI1 Satellite", ring, 0.05 + Math.random() * 0.05, Math.random() * Math.PI * 2);
+      }
+      satellite("AI1 Prime", 1.22 * R, 0.042, 0.8, true);
+
+      const lineGeo = new THREE.BufferGeometry();
+      const linePos = [];
+      for (let i = 0; i < 40; i++) linePos.push(0, 0, 0, 0, 0, 0);
+      lineGeo.setAttribute("position", new THREE.Float32BufferAttribute(linePos, 3));
+      const links = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ color: C.amber, transparent: true, opacity: 0.12 }));
+      links.userData.tick = (t) => {
+        const p = links.geometry.attributes.position;
+        for (let i = 0; i < 40; i++) {
+          const a = satellites[(i * 3) % satellites.length].position;
+          const b = satellites[(i * 3 + 11) % satellites.length].position;
+          p.setXYZ(i * 2, a.x, a.y, a.z);
+          p.setXYZ(i * 2 + 1, b.x, b.y, b.z);
+        }
+        p.needsUpdate = true;
+        links.material.opacity = 0.09 + 0.03 * Math.sin(t * 2.2) ** 2;
+      };
+      animated.push(links);
+      scene.add(links);
+
+      const gateway = buildGatewayStation();
+      gateway.position.set(1.9 * R, 0.35 * R, -0.8 * R);
+      gateway.rotation.y = -0.35;
+      scene.add(gateway);
+      const gatewayHit = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42 * R, 24, 12),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      gatewayHit.position.copy(gateway.position);
+      scene.add(addInteractive(gatewayHit, "Gateway Station", () => travel("gateway"), "Click to enter docking bay interior"));
+      label("GATEWAY STATION", gateway.position.clone().add(new THREE.Vector3(0, 0.45 * R, 0)), 0.68);
+
+      setOrbit(new THREE.Vector3(0, 0, 0), 2.6 * R, 1.3 * R, 6 * R, 0.18, 0.3);
+    }
+
+    function buildGateway() {
+      resetScene();
+      makeStars(scene);
+      mode = "gateway";
+      UI.location.textContent = "GATEWAY STATION // DOCKING BAY";
+      UI.returnBtn.style.display = "block";
+      UI.hint.textContent = "Drag to orbit the docking bay. Wheel zooms. Hover the Moon display. Click the Mare Imbrium Transit shuttle.";
+      addLights(scene, false);
+      scene.add(new THREE.AmbientLight(0x0a1420, 0.5));
+      for (const z of [-6, -14]) {
+        const bayLight = new THREE.PointLight(0x4aa8ff, 1.8, 18);
+        bayLight.position.set(0, 4.8, z);
+        scene.add(bayLight);
+      }
+      const shuttleLight = new THREE.PointLight(0xff9a3c, 1.2, 14);
+      shuttleLight.position.set(0, 2, -13);
+      scene.add(shuttleLight);
+      renderer.setClearColor(0x070a0f, 1);
+      scene.fog = new THREE.FogExp2(0x070a0f, 0.026);
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(15, 0.32, 42), mat.dark);
+      floor.position.y = -0.2;
+      scene.add(floor);
+      for (const x of [-7.7, 7.7]) {
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6, 42), mat.dark);
+        wall.position.set(x, 2.8, 0);
+        scene.add(wall);
+      }
+      const ceiling = new THREE.Mesh(new THREE.BoxGeometry(15, 0.3, 42), mat.dark);
+      ceiling.position.y = 6;
+      scene.add(ceiling);
+      for (let z = -18; z <= 18; z += 4) {
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(15.4, 0.16, 0.25), mat.white);
+        rib.position.set(0, 5.2, z);
+        scene.add(rib);
+      }
+      const viewport = new THREE.Mesh(new THREE.PlaneGeometry(10, 4), new THREE.MeshBasicMaterial({ color: 0x102444, transparent: true, opacity: 0.72 }));
+      viewport.position.set(0, 3.3, -20.8);
+      scene.add(viewport);
+      const smallEarth = earthMesh(2.1);
+      smallEarth.position.set(0, 2.6, -23.7);
+      scene.add(smallEarth);
+
+      const moonHolo = moonMesh(1.25);
+      moonHolo.material.transparent = true;
+      moonHolo.material.opacity = 0.72;
+      moonHolo.position.set(0, 2.4, -4);
+      scene.add(addInteractive(moonHolo, "Mare Imbrium Lunar Display", null, "Amber marker marks GRU Hotel approach vector"));
+      const marker = glowRing(0.34, 0.018);
+      marker.position.set(0.85, 2.75, -3.36);
+      marker.rotation.y = Math.PI / 2.6;
+      marker.userData.tick = (t) => marker.scale.setScalar(1 + Math.sin(t * 3) * 0.18);
+      animated.push(marker);
+      scene.add(marker);
+
+      const shuttle = new THREE.Group();
+      const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.86, 5.5, 28), mat.white);
+      fuselage.rotation.x = Math.PI / 2;
+      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.78, 1.25, 28), mat.white);
+      nose.rotation.x = Math.PI / 2;
+      nose.position.z = -3.35;
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.14, 1.2), mat.beskar);
+      wing.position.set(0, -0.28, -0.2);
+      shuttle.add(fuselage, nose, wing);
+      shuttle.position.set(0, 1.25, -14.6);
+      scene.add(shuttle);
+      addInteractive(fuselage, "Mare Imbrium Transit", () => travel("moon"), "Docked Lunar Shuttle");
+      label("MARE IMBRIUM TRANSIT", new THREE.Vector3(0, 3.4, -14.4), 0.62);
+
+      setOrbit(new THREE.Vector3(0, 2.6, -6), 16, 6, 30, 0.1, 0.03);
+    }
+
+    function buildMoon() {
+      resetScene();
+      makeStars(scene);
+      mode = "moon";
+      UI.location.textContent = "LUNAR SURFACE // GRU HOTEL";
+      UI.returnBtn.style.display = "block";
+      UI.hint.textContent = "Drag to orbit Mare Imbrium. Wheel zooms toward the hotel approach.";
+      addLights(scene);
+      renderer.setClearColor(0x010207, 1);
+      scene.fog = new THREE.FogExp2(0x010207, 0.012);
+      UI.welcome.classList.remove("show");
+
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(180, 180, 72, 72), mat.regolith);
+      const pos = ground.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) * 0.22) * 0.16 + Math.cos(pos.getY(i) * 0.18) * 0.18 + Math.random() * 0.08);
+      ground.geometry.computeVertexNormals();
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      const earth = earthMesh(5.5);
+      earth.position.set(-12, 22, -45);
+      scene.add(earth);
+      const flare = new THREE.Mesh(new THREE.SphereGeometry(0.35, 24, 12), new THREE.MeshBasicMaterial({ color: 0x9fd3ff, transparent: true, opacity: 0.65 }));
+      flare.position.set(-6.2, 25.2, -41.4);
+      flare.scale.set(4, 0.22, 0.22);
+      scene.add(flare);
+
+      const pit = new THREE.Mesh(new THREE.CylinderGeometry(10, 13, 1.1, 64), new THREE.MeshStandardMaterial({ color: 0x4d4e4c, roughness: 1 }));
+      pit.position.set(10, -0.55, -12);
+      scene.add(pit);
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(5.8, 48, 20, 0, Math.PI * 2, 0, Math.PI / 2), mat.cream);
+      dome.scale.set(1.35, 0.62, 1);
+      dome.position.set(10, 0.12, -12);
+      scene.add(dome);
+      const module = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, 4.3, 28), mat.white);
+      module.rotation.z = Math.PI / 2;
+      module.position.set(18.5, 1.15, -10.7);
+      scene.add(module);
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 5.2, 24), mat.beskar);
+      tube.rotation.z = Math.PI / 2;
+      tube.position.set(15, 0.92, -11.3);
+      scene.add(tube);
+      hotelEntrance.set(5.2, 0, -7.4);
+
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.2, 0.18), mat.dark);
+      sign.position.set(3.3, 1.3, -5.7);
+      scene.add(sign);
+      label("GRU HOTEL — MARE IMBRIUM • EST. 2032", new THREE.Vector3(3.3, 2.55, -5.55), 0.43);
+      label("YC  BACKED BY Y COMBINATOR", new THREE.Vector3(0.6, 1.3, -4.5), 0.32, "#ff9a3c");
+      label("NVIDIA", new THREE.Vector3(5.7, 1.3, -4.5), 0.32, "#83d14f");
+      label("GRU HOTEL", new THREE.Vector3(10, 5.7, -12), 0.74);
+
+      const entryGlow = glowRing(1.25, 0.04);
+      entryGlow.position.copy(hotelEntrance).add(new THREE.Vector3(0, 1.2, 0));
+      entryGlow.rotation.x = Math.PI / 2;
+      scene.add(entryGlow);
+      makeParticles(scene, 280, 95, 0xc7c3b4);
+      setOrbit(new THREE.Vector3(10, 1, -12), 30, 10, 60, 0.25, -0.45);
+    }
+
+    function openPanel() { UI.panel.classList.add("open"); }
+    function closePanel() { UI.panel.classList.remove("open"); }
+
+    function addLaunchPlume(rocket) {
+      const positions = [];
+      const colors = [];
+      const seeds = [];
+      for (let i = 0; i < 120; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random();
+        const h = Math.random();
+        seeds.push(a, r, h);
+        positions.push(0, -0.6 - h * 5, 0);
+        const whiteHot = Math.random() > 0.45;
+        colors.push(whiteHot ? 1 : 1, whiteHot ? 0.92 : 0.38, whiteHot ? 0.72 : 0.05);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+      const plume = new THREE.Points(geo, new THREE.PointsMaterial({
+        size: 0.42,
+        transparent: true,
+        opacity: 0.92,
+        depthWrite: false,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending
+      }));
+      plume.userData.tick = (t) => {
+        const p = plume.geometry.attributes.position;
+        for (let i = 0; i < 120; i++) {
+          const a = seeds[i * 3] + t * 1.8;
+          const r = seeds[i * 3 + 1];
+          const h = seeds[i * 3 + 2];
+          const spread = 0.5 + h * 3.6 + Math.sin(t * 8 + i) * 0.18;
+          p.setXYZ(i, Math.cos(a) * r * spread, -0.8 - h * 8.5, Math.sin(a) * r * spread);
+        }
+        p.needsUpdate = true;
+      };
+      plume.position.y = -0.05;
+      const anchor = rocket.userData.plumeAnchor || rocket;
+      anchor.add(plume);
+      animated.push(plume);
+      return plume;
+    }
+
+    async function launchToOrbit() {
+      if (launching) return;
+      launching = true;
+      closePanel();
+      const rocket = hubRocket;
+      if (!rocket) {
+        launching = false;
+        iris(buildOrbit);
+        return;
+      }
+      const start = performance.now();
+      const startY = rocket.position.y;
+      addLaunchPlume(rocket);
+      UI.hint.textContent = "Launch Complex Colossus ignition. Tracking ascent to Earth orbit.";
+      await new Promise(resolve => {
+        function step(now) {
+          const p = Math.min((now - start) / 3500, 1);
+          const ease = p * p * (0.35 + 0.65 * p);
+          rocket.position.y = THREE.MathUtils.lerp(startY, 80, ease);
+          if (p < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+      launching = false;
+      iris(buildOrbit);
+    }
+
+    async function iris(next) {
+      UI.iris.animate([{ clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(150% at 50% 50%)" }], { duration: 520, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" });
+      await new Promise(r => setTimeout(r, 540));
+      next();
+      UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 620, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+    }
+
+    function travel(dest) {
+      closePanel();
+      if (dest === "orbit") {
+        if (mode === "hub") launchToOrbit();
+        else iris(buildOrbit);
+      }
+      if (dest === "gateway") iris(buildGateway);
+      if (dest === "moon") iris(buildMoon);
+      if (dest === "hub") iris(buildHub);
+    }
+
+    function updateOrbitCamera() {
+      const x = Math.sin(orbitYaw) * Math.cos(orbitPitch) * orbitDistance;
+      const y = Math.sin(orbitPitch) * orbitDistance;
+      const z = Math.cos(orbitYaw) * Math.cos(orbitPitch) * orbitDistance;
+      camera.position.set(orbitTarget.x + x, orbitTarget.y + y, orbitTarget.z + z);
+      camera.lookAt(orbitTarget);
+    }
+
+    function updateOrbit(dt, t) {
+      const pos = new THREE.Vector3();
+      for (const s of satellites) {
+        const d = s.userData;
+        const a = t * d.speed + d.phase;
+        pos.set(Math.cos(a) * d.radius, 0, Math.sin(a) * d.radius);
+        pos.applyAxisAngle(new THREE.Vector3(1, 0, 0), d.inclination);
+        pos.applyAxisAngle(new THREE.Vector3(0, 1, 0), d.ascendingNode);
+        s.position.copy(pos);
+        s.lookAt(0, 0, 0);
+      }
+      updateOrbitCamera();
+    }
+
+    function pick() {
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(interactive, true);
+      let hit = null;
+      for (const h of hits) {
+        let o = h.object;
+        while (o && !o.userData.interactive) o = o.parent;
+        if (o) { hit = o; break; }
+      }
+      if (hit !== hovered) {
+        if (hovered && hovered.material && hovered.material.emissive) hovered.material.emissive.setHex(hovered.material.userData.baseEmissive || 0x000000);
+        hovered = hit;
+        if (hovered && hovered.material && hovered.material.emissive) hovered.material.emissive.setHex(C.amber);
+      }
+      if (hovered) {
+        const d = hovered.userData.interactive;
+        UI.tooltip.innerHTML = `<strong>${d.name}</strong><br>${d.detail || "Interactive destination"}`;
+        UI.tooltip.style.opacity = 1;
+      } else {
+        UI.tooltip.style.opacity = 0;
+      }
+    }
+
+    function animate() {
+      const dt = Math.min(clock.getDelta(), 0.04);
+      const t = clock.elapsedTime;
+      requestAnimationFrame(animate);
+      if (mode === "orbit") updateOrbit(dt, t);
+      if (mode !== "orbit") updateOrbitCamera();
+      if (mode === "moon") UI.welcome.classList.toggle("show", orbitDistance < 15);
+      for (const a of animated) if (a.userData.tick) a.userData.tick(t, dt);
+      pick();
+      renderer.render(scene, camera);
+    }
+
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+    renderer.domElement.addEventListener("pointerdown", e => {
+      dragging = true;
+      dragMoved = false;
+      down.x = e.clientX;
+      down.y = e.clientY;
+      renderer.domElement.setPointerCapture(e.pointerId);
+    });
+    renderer.domElement.addEventListener("pointermove", e => {
+      normalizedMouse(e);
+      UI.tooltip.style.left = `${e.clientX}px`;
+      UI.tooltip.style.top = `${e.clientY}px`;
+      if (dragging) {
+        orbitYaw += e.movementX * -0.005;
+        orbitPitch += e.movementY * 0.005;
+        orbitPitch = THREE.MathUtils.clamp(orbitPitch, -1.4, 1.4);
+        if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) dragMoved = true;
+      }
+    });
+    renderer.domElement.addEventListener("pointerup", e => {
+      dragging = false;
+      normalizedMouse(e);
+      if (!dragMoved && hovered && hovered.userData.interactive.action) {
+        hovered.userData.interactive.action();
+      }
+    });
+    renderer.domElement.addEventListener("wheel", e => {
+      orbitDistance = THREE.MathUtils.clamp(orbitDistance + e.deltaY * 0.025, orbitMin, orbitMax);
+    }, { passive: true });
+    UI.returnBtn.addEventListener("click", () => travel("hub"));
+    document.getElementById("closePanel").addEventListener("click", closePanel);
+    document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => travel(btn.dataset.dest)));
+
+    buildHub();
+    UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 800, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+    animate();
+  </script>
+</body>
+</html>
