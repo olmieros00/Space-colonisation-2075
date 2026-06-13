@@ -4,52 +4,7 @@ import { label } from "../../core/labels.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 import { openPanel } from "../../core/ui.js";
 import { makeConcreteTexture, makeLogoTexture, makeSolarTexture } from "./textures.js";
-
-export function buildRocket() {
-  const g = new THREE.Group();
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xe2e3dd, metalness: 0.18, roughness: 0.36, clearcoat: 0.35 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x111217, metalness: 0.4, roughness: 0.42 });
-  const metal = new THREE.MeshStandardMaterial({ color: 0x59616b, metalness: 0.72, roughness: 0.34 });
-  const radius = 0.52;
-  const body = cyl(radius, radius, 12.6, white, 64, 0, 6.85, 0);
-  const upper = cyl(radius * 1.02, radius * 1.02, 1.2, white, 64, 0, 13.75, 0);
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.02, 64, 24, 0, Math.PI * 2, 0, Math.PI / 2), white);
-  cap.position.y = 14.35;
-  const interstage = cyl(radius * 1.03, radius * 1.03, 0.38, black, 64, 0, 12.95, 0);
-  g.add(body, upper, cap, interstage);
-
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 4.9), new THREE.MeshBasicMaterial({ map: makeLogoTexture("FRONTIER", true), transparent: true }));
-  logo.position.set(0, 7.1, radius + 0.012);
-  g.add(logo);
-
-  for (let i = 0; i < 4; i++) {
-    const a = i * Math.PI / 2;
-    const fin = box(0.055, 0.68, 0.42, black);
-    fin.position.set(Math.cos(a) * 0.57, 11.9, Math.sin(a) * 0.57);
-    fin.rotation.y = -a;
-    g.add(fin);
-  }
-  for (let i = 0; i < 4; i++) {
-    const a = i * Math.PI / 2 + Math.PI / 4;
-    const leg = box(0.07, 2.4, 0.12, black);
-    leg.position.set(Math.cos(a) * 0.62, 1.25, Math.sin(a) * 0.62);
-    leg.rotation.z = Math.cos(a) * 0.18;
-    leg.rotation.x = Math.sin(a) * -0.18;
-    g.add(leg);
-  }
-  const octaweb = new THREE.Group();
-  octaweb.add(cyl(radius * 1.08, radius * 1.08, 0.22, black, 64, 0, 0.2, 0));
-  for (let i = 0; i < 9; i++) {
-    const a = i === 0 ? 0 : (i - 1) * Math.PI / 4;
-    const r = i === 0 ? 0 : 0.33;
-    const nozzle = cyl(0.075, 0.12, 0.34, metal, 18, Math.cos(a) * r, -0.04, Math.sin(a) * r);
-    octaweb.add(nozzle);
-  }
-  g.add(octaweb);
-  g.userData.plumeAnchor = octaweb;
-  shadowAll(g);
-  return g;
-}
+import { buildRocket } from "./rocket.js";
 
 export function buildPad(scene, interactive, travel) {
   const concrete = new THREE.MeshStandardMaterial({ color: 0x777a74, roughness: 0.82, metalness: 0.03 });
@@ -62,6 +17,8 @@ export function buildPad(scene, interactive, travel) {
   const trench = box(5.4, 0.58, 8.9, scorch, -24, 0.72, 2.75);
   trench.rotation.y = 0.02;
   scene.add(trench);
+  scene.add(box(0.22, 0.22, 13.8, steel, -27.25, 1.08, 2.8));
+  scene.add(box(0.22, 0.22, 13.8, steel, -20.75, 1.08, 2.8));
   const blackHalo = new THREE.Mesh(new THREE.RingGeometry(4.2, 13.5, 80), new THREE.MeshBasicMaterial({ color: 0x0c0b0a, transparent: true, opacity: 0.24, side: THREE.DoubleSide }));
   blackHalo.rotation.x = -Math.PI / 2;
   blackHalo.position.set(-24, 0.735, 0.2);
@@ -110,7 +67,9 @@ export function buildTowers(scene) {
   const deck = box(4.4, 0.45, 3.3, steel, 0, 18.4, 0);
   const chopA = box(8.5, 0.28, 0.34, steel, -4.8, 17.8, -0.72);
   const chopB = box(8.5, 0.28, 0.34, steel, -4.8, 16.85, 0.72);
-  mech.add(deck, chopA, chopB);
+  const qd = box(5.6, 0.22, 0.28, steel, -3.2, 12.4, 0.1);
+  qd.rotation.z = -0.08;
+  mech.add(deck, chopA, chopB, qd);
   mech.position.set(-17.3, 0, -3.2);
   scene.add(shadowAll(mech));
 
@@ -163,6 +122,9 @@ export function buildFacility(scene, interactive) {
   const logo = new THREE.Mesh(new THREE.PlaneGeometry(10.5, 2.45), new THREE.MeshBasicMaterial({ map: makeLogoTexture(), transparent: true }));
   logo.position.set(-11.5, 4.6, 5.36);
   building.add(logo);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(8.8, 1.0), new THREE.MeshBasicMaterial({ map: makeLogoTexture("FIRST LIGHT"), transparent: true }));
+  sign.position.set(12.2, 4.75, 5.37);
+  building.add(sign);
   const solarMat = new THREE.MeshStandardMaterial({ map: makeSolarTexture(), color: 0x233f6a, emissive: 0x081326, emissiveIntensity: 0.12, metalness: 0.35, roughness: 0.42 });
   for (let i = -4; i <= 4; i++) {
     const panel = box(3.0, 0.08, 2.2, solarMat, i * 3.3, 6.45, -1.3);
@@ -174,6 +136,7 @@ export function buildFacility(scene, interactive) {
   }
   building.position.set(9, 0, -35);
   scene.add(addInteractive(interactive, shadowAll(building), "Frontier Starbase Campus", () => openPanel(), "Open the route map from Texas to the Moon"));
+  label(scene, "FIRST LIGHT CAMPUS", new THREE.Vector3(9, 9.0, -40), 0.46, "subsystem");
 
   const control = new THREE.Group();
   const base = box(10, 3.2, 7.5, wall, 0, 1.6, 0);

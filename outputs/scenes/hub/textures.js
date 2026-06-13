@@ -82,10 +82,10 @@ export function makeSolarTexture() {
 export function makeLogoTexture(text = "FRONTIER", vertical = false) {
   return canvasTexture(vertical ? 256 : 768, vertical ? 768 : 180, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "rgba(235,238,238,0.96)";
+    ctx.fillStyle = "rgba(244,246,243,0.96)";
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = "#252a30";
-    ctx.font = `900 ${vertical ? 58 : 96}px Arial Black, Arial`;
+    ctx.font = `900 ${vertical ? 54 : 82}px Arial Black, Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     if (vertical) {
@@ -93,13 +93,21 @@ export function makeLogoTexture(text = "FRONTIER", vertical = false) {
       ctx.rotate(-Math.PI / 2);
       ctx.fillText(text, 0, 0);
     } else {
-      ctx.fillText(text, w * 0.5, h * 0.54);
-      ctx.strokeStyle = "rgba(60,68,76,0.38)";
-      ctx.lineWidth = 2;
+      ctx.fillText(text, w * 0.54, h * 0.54);
+      ctx.strokeStyle = "rgba(60,68,76,0.48)";
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.moveTo(w * 0.15, h * 0.72);
-      ctx.quadraticCurveTo(w * 0.58, h * 0.18, w * 0.89, h * 0.32);
+      ctx.moveTo(w * 0.08, h * 0.72);
+      ctx.quadraticCurveTo(w * 0.47, h * 0.14, w * 0.88, h * 0.32);
       ctx.stroke();
+      ctx.fillStyle = "#ff9a3c";
+      ctx.beginPath();
+      ctx.moveTo(w * 0.09, h * 0.28);
+      ctx.lineTo(w * 0.18, h * 0.18);
+      ctx.lineTo(w * 0.23, h * 0.28);
+      ctx.lineTo(w * 0.18, h * 0.38);
+      ctx.closePath();
+      ctx.fill();
     }
   });
 }

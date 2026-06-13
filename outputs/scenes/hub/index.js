@@ -3,13 +3,13 @@ import { addInteractive } from "../../core/materials.js";
 import { label } from "../../core/labels.js";
 import { setOrbit } from "../../core/camera.js";
 import { addHorizonGround, configureDaylight } from "./environment.js";
+import { buildRocket } from "./rocket.js";
 import {
   buildDisplayBooster,
   buildFacility,
   buildGround,
   buildPad,
   buildProps,
-  buildRocket,
   buildTowers
 } from "./structures.js";
 
@@ -36,6 +36,6 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
   scene.add(addInteractive(interactive, rocket, "Colossus Heavy", () => travel("orbit"), "Click to light the engines and climb toward the blue world above"));
 
   buildTowers(scene);
-  label(scene, "FIRST LIGHT // COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "hero");
+  label(scene, "FIRST LIGHT // COLOSSUS", new THREE.Vector3(-24, 28.6, -7.5), 0.7, "hero");
   setOrbit(new THREE.Vector3(-24, 6.1, -3), 44, 18, 82, 0.15, 0.95);
 }

@@ -39,7 +39,8 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | moon.js | Lunar surface — regolith, Imbrium Haven, Earth in sky |
 | hub/index.js | Starbase Texas scene entry point |
 | hub/environment.js | Starbase daylight sky, PMREM environment, sun/fill lights, horizon ground, fog support |
-| hub/structures.js | Starbase rocket, pad, towers, campus, props, foreground ground/apron |
+| hub/rocket.js | First Light two-stage hero rocket, procedural markings, engine/nozzle/fins detail |
+| hub/structures.js | Starbase pad, catch tower, lightning masts, campus, props, foreground ground/apron |
 | hub/textures.js | Starbase procedural canvas textures |
 | orbit/index.js | Orbit scene orchestration, camera params |
 | orbit/earth.js | Earth sphere — textures, day/night shader, clouds, atmosphere, Moon texture helper |
