@@ -1,7 +1,35 @@
 import * as THREE from "three";
 import { C, addInteractive, mat } from "../../core/materials.js";
 
-function satellite(scene, R, interactive, satellites, focusOnObject, name, radius, speed, phase, prime = false, plane = 0, index = 0) {
+const PLANE_COUNT = 10;
+const SATELLITES_PER_PLANE = 15;
+const WALKER_INCLINATION = 0.925;
+const ORBIT_NORMAL_BASE = new THREE.Vector3(0, 1, 0);
+
+function orbitalPlaneNormal(inclination, ascendingNode) {
+  return ORBIT_NORMAL_BASE.clone()
+    .applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), ascendingNode)
+    .normalize();
+}
+
+function addPlaneGuideRing(scene, radius, planeNormal) {
+  const points = [];
+  for (let i = 0; i <= 128; i++) {
+    const a = i * Math.PI * 2 / 128;
+    points.push(Math.cos(a) * radius, 0, Math.sin(a) * radius);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+  const ring = new THREE.Line(
+    geo,
+    new THREE.LineBasicMaterial({ color: 0x4a6a8a, transparent: true, opacity: 0.07 })
+  );
+  ring.quaternion.setFromUnitVectors(ORBIT_NORMAL_BASE, planeNormal);
+  scene.add(ring);
+}
+
+function satellite(scene, R, interactive, satellites, focusOnObject, name, radius, speed, phase, prime = false, plane = 0, index = 0, planeNormal = ORBIT_NORMAL_BASE) {
   const g = new THREE.Group();
   const span = (prime ? 0.08 : 0.045) * R;
   const bodySize = prime ? 0.010 * R : 0.007 * R;
@@ -69,8 +97,9 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
     prime,
     plane,
     index,
-    inclination: 0.925,
-    ascendingNode: plane * (Math.PI * 2 / 10)
+    inclination: WALKER_INCLINATION,
+    ascendingNode: plane * (Math.PI * 2 / PLANE_COUNT),
+    orbitalNormal: planeNormal.clone()
   };
   if (prime) {
     g.userData.focusable = true;
@@ -83,15 +112,22 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
 
 export function buildConstellation(scene, R, interactive, animated, satellites, focusOnObject) {
   const shells = [1.06 * R, 1.10 * R, 1.14 * R];
-  for (let k = 0; k < 10; k++) {
+  const middleR = 1.10 * R;
+  const meanSpeed = 0.09 * Math.pow((1.06 * R) / middleR, 1.5);
+  const planeGuides = [];
+  for (let k = 0; k < PLANE_COUNT; k++) {
     const radius = shells[k % shells.length];
-    const speed = 0.09 * Math.pow(1.06 * R / radius, 1.5);
-    for (let j = 0; j < 15; j++) {
-      const phase = j * (Math.PI * 2 / 15) + k * 0.07;
+    const speed = meanSpeed * Math.pow(middleR / radius, 1.5 * 3.0);
+    const ascendingNode = k * (Math.PI * 2 / PLANE_COUNT);
+    const planeNormal = orbitalPlaneNormal(WALKER_INCLINATION, ascendingNode);
+    planeGuides.push({ radius, planeNormal });
+    for (let j = 0; j < SATELLITES_PER_PLANE; j++) {
+      const phase = j * (Math.PI * 2 / SATELLITES_PER_PLANE) + k * 0.07;
       const isPrime = k === 0 && j === 0;
-      satellite(scene, R, interactive, satellites, focusOnObject, isPrime ? "AI1 Prime" : "AI1 Satellite", radius, speed, phase, isPrime, k, j);
+      satellite(scene, R, interactive, satellites, focusOnObject, isPrime ? "AI1 Prime" : "AI1 Satellite", radius, speed, phase, isPrime, k, j, planeNormal);
     }
   }
+  for (const guide of planeGuides) addPlaneGuideRing(scene, guide.radius, guide.planeNormal);
 
   const lineGeo = new THREE.BufferGeometry();
   const linePos = [];
@@ -116,6 +152,10 @@ export function buildConstellation(scene, R, interactive, animated, satellites, 
 
 export function updateConstellation(satellites, t) {
   const pos = new THREE.Vector3();
+  const radial = new THREE.Vector3();
+  const tangent = new THREE.Vector3();
+  const wingAxis = new THREE.Vector3();
+  const rotation = new THREE.Matrix4();
   for (const s of satellites) {
     const d = s.userData;
     const a = t * d.speed + d.phase;
@@ -123,6 +163,10 @@ export function updateConstellation(satellites, t) {
     pos.applyAxisAngle(new THREE.Vector3(1, 0, 0), d.inclination);
     pos.applyAxisAngle(new THREE.Vector3(0, 1, 0), d.ascendingNode);
     s.position.copy(pos);
-    s.lookAt(0, 0, 0);
+    radial.copy(pos).normalize();
+    tangent.crossVectors(d.orbitalNormal, radial).normalize();
+    wingAxis.crossVectors(radial, tangent).normalize();
+    rotation.makeBasis(wingAxis, radial, tangent);
+    s.quaternion.setFromRotationMatrix(rotation);
   }
 }
