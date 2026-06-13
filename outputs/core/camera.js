@@ -18,13 +18,26 @@ export const camState = {
   focusPauseRoot: null,
   isFocused: false,
   focusExitDistance: 0,
-  focusExitCallback: null
+  focusExitCallback: null,
+  canInspect: false,
+  inspectionActive: false,
+  inspectionRoot: null,
+  inspectionLocalTarget: new THREE.Vector3(),
+  inspectionTween: null,
+  inspectionRestore: null,
+  inspectionFocusDistance: 12.48
 };
 
 const tmpFocusWorld = new THREE.Vector3();
+const tmpInspectionWorld = new THREE.Vector3();
+const tmpInspectionTarget = new THREE.Vector3();
 
 function focusWorldPosition(obj) {
   return obj.getWorldPosition(tmpFocusWorld);
+}
+
+function localToWorld(root, local, target = tmpInspectionWorld) {
+  return target.copy(local).applyMatrix4(root.matrixWorld);
 }
 
 function releaseFocusPause() {
@@ -55,6 +68,10 @@ export function focusOnObject(obj, UI, R, closeDistance, options = {}) {
   camState.focusedObject = obj;
   camState.focusPauseRoot = options.pauseRoot || obj.userData.pauseRoot || null;
   camState.isFocused = true;
+  camState.canInspect = Boolean(options.canInspect && options.inspectionRoot);
+  camState.inspectionRoot = options.inspectionRoot || null;
+  camState.inspectionLocalTarget.copy(options.inspectionLocalTarget || new THREE.Vector3(0, 0, 0));
+  camState.inspectionFocusDistance = closeDistance || 0.78 * R;
   camState.focusExitDistance = options.exitDistance || 2.15 * R;
   camState.orbitMin = options.orbitMin || 0.035 * R;
   camState.orbitMax = options.orbitMax || 2.35 * R;
@@ -69,12 +86,26 @@ export function focusOnObject(obj, UI, R, closeDistance, options = {}) {
     toDistance: camState.focusDistance
   };
   UI.earthViewBtn.style.display = "block";
+  if (UI.inspectBtn) {
+    UI.inspectBtn.textContent = "ENTER STRUCTURE";
+    UI.inspectBtn.style.display = camState.canInspect ? "block" : "none";
+  }
 }
 
 export function focusEarth(UI, R) {
+  camState.inspectionActive = false;
+  camState.inspectionTween = null;
+  if (camState.inspectionRestore) {
+    camState.inspectionRestore.camera.near = camState.inspectionRestore.near;
+    camState.inspectionRestore.camera.far = camState.inspectionRestore.far;
+    camState.inspectionRestore.camera.updateProjectionMatrix();
+    camState.inspectionRestore = null;
+  }
   releaseFocusPause();
   camState.focusedObject = null;
   camState.isFocused = false;
+  camState.canInspect = false;
+  camState.inspectionRoot = null;
   camState.focusExitDistance = 0;
   camState.orbitMin = 1.02 * R;
   camState.orbitMax = 6 * R;
@@ -88,9 +119,88 @@ export function focusEarth(UI, R) {
     toDistance: camState.focusDistance,
     hideButton: true
   };
+  if (UI.inspectBtn) UI.inspectBtn.style.display = "none";
+}
+
+export function enterInspection(camera, UI) {
+  if (!camState.canInspect || !camState.inspectionRoot || camState.inspectionActive) return;
+  camState.inspectionRoot.updateWorldMatrix(true, true);
+  const localEye = new THREE.Vector3(-0.22, 0.24, -0.42);
+  const target = localToWorld(camState.inspectionRoot, camState.inspectionLocalTarget, new THREE.Vector3());
+  const eye = localToWorld(camState.inspectionRoot, localEye, new THREE.Vector3());
+  if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = false;
+  camState.inspectionActive = true;
+  camState.orbitMin = 0.05;
+  camState.orbitMax = 3;
+  camState.orbitYaw = -Math.PI / 2;
+  camState.orbitPitch = -0.1;
+  camState.inspectionRestore = { camera, near: camera.near, far: camera.far };
+  camera.near = 0.01;
+  camera.far = 200;
+  camera.updateProjectionMatrix();
+  camState.inspectionTween = {
+    start: performance.now(),
+    localEye,
+    fromPosition: camera.position.clone(),
+    toPosition: eye,
+    fromTarget: camState.orbitTarget.clone(),
+    toTarget: target,
+    fromDistance: camState.orbitDistance,
+    toDistance: 0.55
+  };
+  if (UI.inspectBtn) {
+    UI.inspectBtn.textContent = "↺ EXIT STRUCTURE";
+    UI.inspectBtn.style.display = "block";
+  }
+}
+
+export function exitInspection(camera, UI) {
+  if (!camState.inspectionActive && !camState.inspectionTween) return;
+  camState.inspectionActive = false;
+  camState.inspectionTween = null;
+  if (camState.inspectionRestore) {
+    camState.inspectionRestore.camera.near = camState.inspectionRestore.near;
+    camState.inspectionRestore.camera.far = camState.inspectionRestore.far;
+    camState.inspectionRestore.camera.updateProjectionMatrix();
+    camState.inspectionRestore = null;
+  } else {
+    camera.near = 0.1;
+    camera.far = 2400;
+    camera.updateProjectionMatrix();
+  }
+  if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = true;
+  camState.orbitMin = 0.288;
+  camState.orbitMax = 31.2;
+  camState.orbitDistance = camState.inspectionFocusDistance;
+  if (camState.focusedObject) camState.orbitTarget.copy(focusWorldPosition(camState.focusedObject));
+  if (UI.inspectBtn) {
+    UI.inspectBtn.textContent = "ENTER STRUCTURE";
+    UI.inspectBtn.style.display = camState.canInspect ? "block" : "none";
+  }
 }
 
 export function updateCamera(camera) {
+  if (camState.inspectionTween) {
+    camState.inspectionRoot?.updateWorldMatrix(true, true);
+    if (camState.inspectionRoot) {
+      camState.inspectionTween.toTarget.copy(localToWorld(camState.inspectionRoot, camState.inspectionLocalTarget, tmpInspectionTarget));
+      camState.inspectionTween.toPosition.copy(localToWorld(camState.inspectionRoot, camState.inspectionTween.localEye, tmpInspectionWorld));
+    }
+    const p = Math.min((performance.now() - camState.inspectionTween.start) / 1000, 1);
+    const e = easeInOut(p);
+    camera.position.lerpVectors(camState.inspectionTween.fromPosition, camState.inspectionTween.toPosition, e);
+    camState.orbitTarget.lerpVectors(camState.inspectionTween.fromTarget, camState.inspectionTween.toTarget, e);
+    camState.orbitDistance = THREE.MathUtils.lerp(camState.inspectionTween.fromDistance, camState.inspectionTween.toDistance, e);
+    camera.lookAt(camState.orbitTarget);
+    if (p >= 1) camState.inspectionTween = null;
+    return;
+  }
+
+  if (camState.inspectionActive && camState.inspectionRoot) {
+    camState.inspectionRoot.updateWorldMatrix(true, true);
+    camState.orbitTarget.copy(localToWorld(camState.inspectionRoot, camState.inspectionLocalTarget, tmpInspectionTarget));
+  }
+
   if (camState.focusTween) {
     if (camState.isFocused && camState.focusedObject) {
       camState.focusTween.toTarget.copy(focusWorldPosition(camState.focusedObject));

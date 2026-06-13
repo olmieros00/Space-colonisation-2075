@@ -5,7 +5,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { UI, closePanel } from "./ui.js";
-import { camState, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
+import { camState, enterInspection, exitInspection, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
 import { travel } from "./transitions.js";
 import { buildHub } from "../scenes/hub.js";
@@ -16,6 +16,7 @@ import { updateConstellation } from "../scenes/orbit/constellation.js";
 import { earthMesh, moonMesh } from "../scenes/orbit/earth.js";
 
 const canvas = document.getElementById("scene");
+if (!UI.inspectBtn) UI.inspectBtn = document.getElementById("inspectBtn");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
@@ -86,8 +87,23 @@ function resetScene() {
   camState.focusedObject = null;
   camState.focusPauseRoot = null;
   camState.isFocused = false;
+  camState.canInspect = false;
+  camState.inspectionActive = false;
+  camState.inspectionRoot = null;
+  camState.inspectionTween = null;
+  if (camState.inspectionRestore) {
+    camera.near = camState.inspectionRestore.near;
+    camera.far = camState.inspectionRestore.far;
+    camera.updateProjectionMatrix();
+    camState.inspectionRestore = null;
+  } else if (camera.near !== 0.1 || camera.far !== 2400) {
+    camera.near = 0.1;
+    camera.far = 2400;
+    camera.updateProjectionMatrix();
+  }
   camState.focusExitDistance = 0;
   if (UI.earthViewBtn) UI.earthViewBtn.style.display = "none";
+  if (UI.inspectBtn) UI.inspectBtn.style.display = "none";
   scene = new THREE.Scene();
   state.scene = scene;
   renderPass.scene = scene;
@@ -186,6 +202,12 @@ initCameraEvents(
 
 UI.returnBtn.addEventListener("click", () => go("hub"));
 UI.earthViewBtn.addEventListener("click", () => focusEarth(UI, R));
+if (UI.inspectBtn) {
+  UI.inspectBtn.addEventListener("click", () => {
+    if (camState.inspectionActive || camState.inspectionTween) exitInspection(camera, UI);
+    else enterInspection(camera, UI);
+  });
+}
 camState.focusExitCallback = () => focusEarth(UI, R);
 document.getElementById("closePanel").addEventListener("click", closePanel);
 document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => go(btn.dataset.dest)));

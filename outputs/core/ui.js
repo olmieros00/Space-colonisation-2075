@@ -6,7 +6,8 @@ export const UI = {
   iris: document.getElementById("iris"),
   welcome: document.getElementById("welcome"),
   returnBtn: document.getElementById("returnBtn"),
-  earthViewBtn: document.getElementById("earthViewBtn")
+  earthViewBtn: document.getElementById("earthViewBtn"),
+  inspectBtn: document.getElementById("inspectBtn")
 };
 
 export function openPanel() {

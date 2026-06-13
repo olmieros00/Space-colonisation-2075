@@ -82,7 +82,7 @@
       display: none;
     }
 
-    #earthViewBtn {
+    #earthViewBtn, #inspectBtn {
       position: fixed;
       left: 50%;
       bottom: 18px;
@@ -95,13 +95,22 @@
       display: none;
     }
 
-    #returnBtn:hover, #earthViewBtn:hover, .mission-card:hover, #closePanel:hover {
+    #inspectBtn {
+      bottom: 72px;
+      min-width: 196px;
+    }
+
+    #returnBtn:hover, #earthViewBtn:hover, #inspectBtn:hover, .mission-card:hover, #closePanel:hover {
       border-color: var(--amber);
       background: rgba(255, 154, 60, 0.16);
       transform: translateY(-1px);
     }
 
     #earthViewBtn:hover {
+      transform: translateX(-50%) translateY(-1px);
+    }
+
+    #inspectBtn:hover {
       transform: translateX(-50%) translateY(-1px);
     }
 
@@ -251,6 +260,7 @@
   <div id="hud"><span class="visor"></span><span id="location">FRONTIER 2075 // STARBASE TEXAS</span></div>
   <button id="returnBtn">RETURN TO FIRST LIGHT</button>
   <button id="earthViewBtn">↺ EARTH VIEW</button>
+  <button id="inspectBtn">ENTER STRUCTURE</button>
   <div id="tooltip"></div>
   <div id="welcome">Welcome to Imbrium Haven.<br>Earth is still in the sky.</div>
   <section id="missionPanel" aria-label="Mission Control">

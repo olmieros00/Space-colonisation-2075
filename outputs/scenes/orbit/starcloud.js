@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { addInteractive, label, mat } from "../../core/materials.js";
+import { addInteractive, cylinderBetween, label, mat } from "../../core/materials.js";
 
 const TWO_PI = Math.PI * 2;
 
@@ -252,6 +252,85 @@ function addDragonCapsule(root, R) {
   root.add(capsule);
 }
 
+function addHumanScaleMarkers(root) {
+  const suitMat = new THREE.MeshStandardMaterial({ color: 0xd8d9d4, metalness: 0.12, roughness: 0.58 });
+  const visorMat = new THREE.MeshStandardMaterial({ color: 0x101218, metalness: 0.35, roughness: 0.28 });
+  const placements = [
+    [-3.15, 0.058, -0.58], [-2.35, 0.058, 0.55], [-1.65, 0.058, -0.62], [-0.9, 0.058, 0.58],
+    [-0.25, 0.058, -0.54], [0.52, 0.058, 0.62], [1.22, 0.058, -0.58], [2.05, 0.058, 0.54],
+    [2.85, 0.058, -0.48], [-3.7, 0.10, 0.18], [3.45, 0.10, -0.12], [0.18, 0.12, 1.54]
+  ];
+  for (let i = 0; i < placements.length; i++) {
+    const [x, y, z] = placements[i];
+    const figure = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.006, 0.022, 4, 8), suitMat);
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.005, 0.002), visorMat);
+    visor.position.set(0, 0.019, -0.005);
+    figure.add(body, visor);
+    figure.position.set(x, y, z);
+    figure.rotation.y = (i % 2 ? 0.2 : -0.25) + (z > 0 ? Math.PI : 0);
+    root.add(figure);
+  }
+}
+
+function addHabitationMassing(root, R) {
+  const shellMat = new THREE.MeshStandardMaterial({ color: 0x6f8292, metalness: 0.58, roughness: 0.42 });
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x08111b, metalness: 0.05, roughness: 0.08, transparent: true, opacity: 0.72 });
+  const solarMat = new THREE.MeshStandardMaterial({ color: 0x0a0e16, metalness: 0.42, roughness: 0.36 });
+  const connectorMat = mat.beskar;
+  const podPositions = [
+    [-2.65, 0.86, -1.22, "villa", 0.16],
+    [-1.72, 0.92, 1.18, "dome", -0.2],
+    [-0.9, 1.02, -1.44, "villa", -0.35],
+    [0.05, 0.88, 1.38, "villa", 0.28],
+    [0.86, 1.0, -1.2, "dome", 0.12],
+    [1.72, 0.94, 1.5, "villa", -0.28],
+    [2.62, 0.84, -1.34, "dome", 0.34],
+    [3.18, 0.96, 0.96, "villa", -0.42]
+  ];
+  for (const [x, y, z, type, rot] of podPositions) {
+    const pod = new THREE.Group();
+    if (type === "villa") {
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.16, 0.22), shellMat);
+      const glass = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.11), glassMat);
+      glass.position.set(0.203, 0.012, 0);
+      glass.rotation.y = Math.PI / 2;
+      const solarBack = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.006, 0.18), solarMat);
+      solarBack.position.y = 0.084;
+      solarBack.rotation.x = 0.05;
+      pod.add(body, glass, solarBack);
+    } else {
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.135, 24, 10, 0, TWO_PI, 0, Math.PI / 2), shellMat);
+      dome.scale.y = 0.96;
+      const aperture = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.055), glassMat);
+      aperture.position.set(0.02, 0.052, -0.112);
+      aperture.rotation.x = -0.2;
+      pod.add(dome, aperture);
+    }
+    pod.position.set(x, y, z);
+    pod.rotation.y = (z > 0 ? Math.PI : 0) + rot;
+    root.add(pod);
+    root.add(cylinderBetween(new THREE.Vector3(x * 0.92, 0.08, z * 0.36), new THREE.Vector3(x, y - 0.08, z * 0.86), 0.018, connectorMat));
+  }
+}
+
+function addRakingInspectionLight(group) {
+  const target = new THREE.Object3D();
+  target.position.set(0.8, 0.2, 0);
+  const sun = new THREE.DirectionalLight(0xffe4bc, 1.15);
+  sun.position.set(-4.5, 1.05, -3.8);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -6;
+  sun.shadow.camera.right = 6;
+  sun.shadow.camera.top = 4;
+  sun.shadow.camera.bottom = -4;
+  sun.shadow.camera.near = 0.05;
+  sun.shadow.camera.far = 12;
+  sun.target = target;
+  group.add(sun, target);
+}
+
 function makeDroidMaterials() {
   return {
     metal: new THREE.MeshStandardMaterial({ color: 0x657481, metalness: 0.72, roughness: 0.56 }),
@@ -308,7 +387,7 @@ function addSegmentedArm(root, mats, u, angle, long = false) {
 
 function treadwellDroid(R, i, mats) {
   const droid = new THREE.Group();
-  const u = 0.026 * R / 18;
+  const u = 0.0068;
   const chassis = new THREE.Mesh(new THREE.BoxGeometry(3.2 * u, 0.7 * u, 2.2 * u), i % 2 ? mats.worn : mats.rust);
   const treadA = new THREE.Mesh(new THREE.BoxGeometry(3.4 * u, 0.32 * u, 0.36 * u), mats.dark);
   const treadB = treadA.clone();
@@ -349,7 +428,7 @@ function treadwellDroid(R, i, mats) {
 
 function mouseDroid(R, i, mats) {
   const droid = new THREE.Group();
-  const u = 0.026 * R / 18;
+  const u = 0.0073;
   const body = new THREE.Mesh(new THREE.BoxGeometry(3.6 * u, 0.9 * u, 2.2 * u), mats.dark);
   const nose = new THREE.Mesh(new THREE.ConeGeometry(1.15 * u, 1.8 * u, 4), mats.worn);
   nose.rotation.z = -Math.PI / 2;
@@ -379,7 +458,7 @@ function mouseDroid(R, i, mats) {
 
 function technicianDroid(R, i, mats) {
   const droid = new THREE.Group();
-  const u = 0.026 * R / 18;
+  const u = 0.013;
   const hips = new THREE.Mesh(new THREE.BoxGeometry(1.7 * u, 0.7 * u, 1.0 * u), mats.dark);
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.78 * u, 0.95 * u, 1.85 * u, 8), mats.worn);
   torso.position.y = 1.35 * u;
@@ -411,7 +490,7 @@ function buildProxyDroids(parent, R) {
   const droids = new THREE.Group();
   const metal = new THREE.MeshStandardMaterial({ color: 0x536270, metalness: 0.55, roughness: 0.65 });
   const lamp = new THREE.MeshStandardMaterial({ color: 0xff9a3c, emissive: 0xff9a3c, emissiveIntensity: 1.2 });
-  const u = 0.026 * R / 18;
+  const u = 0.008;
   for (let i = 0; i < 12; i++) {
     const droid = new THREE.Group();
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.4 * u, 0.8 * u, 1.4 * u), metal);
@@ -453,7 +532,10 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
     pauseRoot: group,
     orbitMin: 0.018 * R,
     orbitMax: 1.95 * R,
-    exitDistance: 1.72 * R
+    exitDistance: 1.72 * R,
+    canInspect: true,
+    inspectionRoot: root,
+    inspectionLocalTarget: new THREE.Vector3(0.82, 0.34, 0.02)
   });
   const solarTex = makeSolarCellTexture();
   const arrayMat = new THREE.MeshPhysicalMaterial({
@@ -479,6 +561,9 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
   addComputeSpine(root, detailRoot, R, interactive, focusStarcloud);
   addLaserTerminals(root, animatedBeams, R);
   addDragonCapsule(root, R);
+  addHabitationMassing(root, R);
+  addHumanScaleMarkers(detailRoot);
+  addRakingInspectionLight(root);
   addInteractive(interactive, root, "Starcloud Atlas", focusStarcloud, "A ~50GW orbital data haven watched by service droids and laser uplinks");
 
   const radiatorMat = new THREE.MeshStandardMaterial({ color: 0xd8d9d4, metalness: 0.12, roughness: 0.66 });
@@ -522,7 +607,7 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
     for (const beam of animatedBeams) beam.userData.tick?.(t);
 
     const focusedHere = camState && camState.isFocused && (camState.focusPauseRoot === group || camState.focusedObject === focusAnchor);
-    const tier = focusedHere && camState.orbitDistance < 0.30 * R
+    const tier = focusedHere && (camState.inspectionActive || camState.orbitDistance < 0.30 * R)
       ? "close"
       : focusedHere && camState.orbitDistance < 0.92 * R
         ? "mid"
@@ -546,6 +631,14 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
   title.position.set(0, 0.54 * R, 0);
   const sub = label(scene, "DARK SOLAR WINGS · SERVICE CAPSULE · LASER COMM ARRAY", new THREE.Vector3(), 0.4, "telemetry");
   sub.position.set(0, 0.42 * R, 0);
+  addInteractive(interactive, title, "Starcloud Atlas", focusStarcloud, "Enter inspection range for the orbital megastructure");
+  addInteractive(interactive, sub, "Starcloud Atlas", focusStarcloud, "Enter inspection range for the orbital megastructure");
   group.add(title, sub);
+  group.traverse(obj => {
+    if (obj.isMesh) {
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+    }
+  });
   return group;
 }
