@@ -14,6 +14,13 @@ Frontier 2075 is a hopeful space-opera interface about leaving Earth without for
 - Subsystem labels: Russo One / Oxanium fallback, uppercase, off-white or amber, lighter glow.
 - Telemetry: Share Tech Mono, muted off-white, quiet and factual.
 
+## Cinematic Title System
+- Use original Frontier 2075 chapter names: `THE MOONBOUND AGE`, `THE FIRST CLIMB`, `THE CROSSING`, `IMBRIUM HAVEN`.
+- Title cards should feel projected into deep space: gold outline, dark core, slow scale resolve, starfield vignette, and an occasional perspective crawl.
+- Use hyperspace streaks only for high-energy route changes such as Starbase to orbit or Starcloud focus moments.
+- Use iris/projector pulses for location reveals and returns, keeping the existing circular wipe as the scene-change grammar.
+- Signature lines should sound like archival mission reels, not product UI: `First Light Archive`, `AI1 constellation tracking nominal`, `Centrifuge ring vector locked`.
+
 ## Palette
 - Hero gold: `#ffd23f`
 - Frontier amber: `#ff9a3c`
@@ -22,4 +29,4 @@ Frontier 2075 is a hopeful space-opera interface about leaving Earth without for
 - Telemetry grey: `rgba(232, 232, 224, 0.72)`
 
 ## Reference Boundary
-Evoke classic space-opera emotion through scale, outline typography, warm gold, and bold title composition. Do not reproduce the Star Wars logo, exact wordmarks, faction marks, or trademarked branding.
+Evoke classic space-opera emotion through scale, outline typography, warm gold, starfields, crawls, and bold chapter composition. Do not reproduce the Star Wars logo, Mandalorian logo, exact wordmarks, faction marks, poster lockups, or trademarked branding.

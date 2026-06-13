@@ -16,6 +16,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 |---|---|
 | app.js | Animation loop, renderer setup, shared state, scene switching |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
+| cinema.js | Original cinematic title cards, crawl copy, hyperspace/projection transition timing |
 | materials.js | Shared colour palette, material definitions, labels, stars, texture loading |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
 | ui.js | DOM element refs, mission panel open/close |

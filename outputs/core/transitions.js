@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { closePanel } from "./ui.js";
+import { showCinematicTitle } from "./cinema.js";
 
-export async function irisWipe(UI, next) {
+export async function irisWipe(UI, next, titleKey = "hub", options = {}) {
   UI.iris.animate([{ clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(150% at 50% 50%)" }], { duration: 520, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" });
   await new Promise(r => setTimeout(r, 540));
   next();
+  await showCinematicTitle(UI, titleKey, options);
   UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 620, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
 }
 
@@ -57,7 +59,7 @@ async function launchToOrbit(scenes, UI, state) {
   const rocket = state.hubRocket;
   if (!rocket) {
     state.launching = false;
-    irisWipe(UI, scenes.orbit);
+    irisWipe(UI, scenes.orbit, "orbit", { variant: "hyperspace" });
     return;
   }
   const start = performance.now();
@@ -75,16 +77,16 @@ async function launchToOrbit(scenes, UI, state) {
     requestAnimationFrame(step);
   });
   state.launching = false;
-  irisWipe(UI, scenes.orbit);
+  irisWipe(UI, scenes.orbit, "orbit", { variant: "hyperspace" });
 }
 
 export function travel(dest, scenes, UI, state) {
   closePanel();
   if (dest === "orbit") {
     if (state.mode === "hub") launchToOrbit(scenes, UI, state);
-    else irisWipe(UI, scenes.orbit);
+    else irisWipe(UI, scenes.orbit, "orbit", { variant: "hyperspace" });
   }
-  if (dest === "gateway") irisWipe(UI, scenes.gateway);
-  if (dest === "moon") irisWipe(UI, scenes.moon);
-  if (dest === "hub") irisWipe(UI, scenes.hub);
+  if (dest === "gateway") irisWipe(UI, scenes.gateway, "gateway", { variant: "iris" });
+  if (dest === "moon") irisWipe(UI, scenes.moon, "moon", { variant: "crawl" });
+  if (dest === "hub") irisWipe(UI, scenes.hub, "hub", { variant: "iris" });
 }

@@ -278,6 +278,209 @@
       clip-path: circle(0% at 50% 50%);
     }
 
+    #cinemaOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 22;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 220ms ease, transform 900ms cubic-bezier(.16,1,.3,1);
+      perspective: 760px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(255, 210, 63, 0.08), transparent 26%),
+        radial-gradient(circle at 50% 50%, rgba(74, 168, 255, 0.05), transparent 42%),
+        rgba(2, 3, 6, 0.74);
+    }
+
+    #cinemaOverlay.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    #cinemaOverlay::before,
+    #cinemaOverlay::after {
+      content: "";
+      position: absolute;
+      inset: -18%;
+      background-image:
+        radial-gradient(circle, rgba(232,232,224,0.88) 0 1px, transparent 1.6px),
+        radial-gradient(circle, rgba(255,210,63,0.55) 0 1px, transparent 1.4px),
+        radial-gradient(circle, rgba(109,180,255,0.45) 0 1px, transparent 1.5px);
+      background-size: 112px 112px, 173px 173px, 251px 251px;
+      background-position: 0 0, 41px 67px, 91px 33px;
+      opacity: 0.58;
+      transform: translateZ(-80px);
+      animation: starDrift 18s linear infinite;
+    }
+
+    #cinemaOverlay::after {
+      opacity: 0.22;
+      filter: blur(0.4px);
+      animation-duration: 34s;
+      animation-direction: reverse;
+    }
+
+    .cinema-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 48%, transparent 0 42%, rgba(2,3,6,0.34) 66%, #020306 100%),
+        linear-gradient(180deg, rgba(2,3,6,0.82), transparent 24%, transparent 70%, rgba(2,3,6,0.86));
+      mix-blend-mode: multiply;
+    }
+
+    .cinema-hyperspace {
+      position: absolute;
+      inset: -20%;
+      opacity: 0;
+      transform: scale(0.76);
+      background:
+        repeating-radial-gradient(ellipse at 50% 50%, rgba(159,211,255,0) 0 7px, rgba(159,211,255,0.7) 8px 9px, rgba(159,211,255,0) 10px 18px),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.82), rgba(109,180,255,0.18) 5%, transparent 30%);
+      filter: blur(0.3px);
+    }
+
+    #cinemaOverlay.hyperspace .cinema-hyperspace {
+      animation: hyperspaceBloom 1180ms cubic-bezier(.76,0,.24,1) both;
+    }
+
+    #cinemaOverlay.iris .cinema-hyperspace {
+      animation: irisPulse 1080ms ease both;
+    }
+
+    .cinema-card {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      width: min(920px, calc(100vw - 36px));
+      padding: 28px 18px;
+      text-align: center;
+      transform-style: preserve-3d;
+      animation: titleResolve 1280ms cubic-bezier(.16,1,.3,1) both;
+    }
+
+    .cinema-kicker,
+    .cinema-subtitle,
+    .cinema-signature {
+      position: relative;
+      z-index: 2;
+      text-transform: uppercase;
+    }
+
+    .cinema-kicker {
+      color: var(--amber);
+      font-family: "Oxanium", "Russo One", sans-serif;
+      font-size: clamp(12px, 1.8vw, 18px);
+      font-weight: 800;
+      letter-spacing: 0.32em;
+      text-shadow: 0 0 16px rgba(255, 154, 60, 0.42);
+    }
+
+    .cinema-title {
+      position: relative;
+      z-index: 2;
+      margin: 4px 0 8px;
+      color: var(--hero-core);
+      font-family: "Bungee Inline", "Orbitron", "Audiowide", sans-serif;
+      font-size: clamp(46px, 10.6vw, 132px);
+      font-weight: 900;
+      line-height: 0.84;
+      letter-spacing: 0.075em;
+      text-transform: uppercase;
+      transform: perspective(560px) rotateX(11deg) scaleX(1.06);
+      -webkit-text-stroke: clamp(1.4px, 0.24vw, 3px) var(--hero-gold);
+      text-shadow:
+        0 0 1px #fff2a6,
+        0 0 18px rgba(255, 174, 0, 0.9),
+        0 0 56px rgba(255, 154, 60, 0.38),
+        0 11px 0 rgba(0, 0, 0, 0.64);
+      filter: drop-shadow(0 0 18px rgba(255, 210, 63, 0.25));
+    }
+
+    .cinema-title::before,
+    .cinema-title::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: min(78vw, 560px);
+      height: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(255,210,63,0.86), transparent);
+      box-shadow: 0 0 14px rgba(255, 174, 0, 0.62);
+    }
+
+    .cinema-title::before { top: -12px; }
+    .cinema-title::after { bottom: -14px; }
+
+    .cinema-subtitle {
+      max-width: 740px;
+      color: var(--text);
+      font-family: "Saira Condensed", "Oxanium", sans-serif;
+      font-size: clamp(18px, 3vw, 32px);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      line-height: 1.05;
+      text-shadow: 0 0 16px rgba(255, 154, 60, 0.28);
+    }
+
+    .cinema-signature {
+      margin-top: 18px;
+      color: var(--telemetry);
+      font-family: "Share Tech Mono", monospace;
+      font-size: clamp(11px, 1.6vw, 14px);
+      letter-spacing: 0.2em;
+    }
+
+    .cinema-crawl {
+      position: absolute;
+      left: 50%;
+      bottom: -28%;
+      width: min(680px, calc(100vw - 46px));
+      color: var(--hero-gold);
+      font-family: "Orbitron", "Oxanium", sans-serif;
+      font-size: clamp(17px, 2.5vw, 27px);
+      font-weight: 700;
+      line-height: 1.55;
+      letter-spacing: 0.055em;
+      text-align: justify;
+      text-transform: uppercase;
+      opacity: 0;
+      transform-origin: 50% 100%;
+      transform: translateX(-50%) perspective(420px) rotateX(63deg) translateY(120%);
+      text-shadow: 0 0 12px rgba(255, 174, 0, 0.58);
+    }
+
+    #cinemaOverlay.crawl .cinema-card {
+      transform: translateY(-18vh) scale(0.78);
+      animation: titleResolve 900ms cubic-bezier(.16,1,.3,1) both;
+    }
+
+    #cinemaOverlay.crawl .cinema-crawl {
+      animation: crawlAway 4300ms linear 250ms both;
+    }
+
+    @media (max-width: 760px) {
+      .cinema-card { padding: 18px 10px; }
+      .cinema-title { letter-spacing: 0.045em; }
+      .cinema-kicker { letter-spacing: 0.18em; }
+      .cinema-subtitle { letter-spacing: 0.08em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #cinemaOverlay::before,
+      #cinemaOverlay::after,
+      .cinema-card,
+      .cinema-crawl,
+      #cinemaOverlay.hyperspace .cinema-hyperspace,
+      #cinemaOverlay.iris .cinema-hyperspace {
+        animation: none !important;
+      }
+    }
+
     #hint {
       position: fixed;
       left: 18px;
@@ -305,6 +508,35 @@
       from { opacity: 0; transform: perspective(520px) rotateX(16deg) scaleX(1.09) scale(0.94); filter: blur(3px); }
       to { opacity: 1; transform: perspective(520px) rotateX(9deg) scaleX(1.04) scale(1); filter: blur(0); }
     }
+
+    @keyframes starDrift {
+      from { transform: translate3d(0, 0, -80px) rotate(0.001deg); }
+      to { transform: translate3d(-72px, 92px, -80px) rotate(0.001deg); }
+    }
+
+    @keyframes titleResolve {
+      0% { opacity: 0; transform: translate3d(0, 42px, -180px) rotateX(18deg) scale(1.18); filter: blur(8px); }
+      48% { opacity: 1; filter: blur(0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes crawlAway {
+      0% { opacity: 0; transform: translateX(-50%) perspective(420px) rotateX(63deg) translateY(120%) scale(1.18); }
+      12% { opacity: 1; }
+      86% { opacity: 0.98; }
+      100% { opacity: 0; transform: translateX(-50%) perspective(420px) rotateX(63deg) translateY(-78%) scale(0.52); }
+    }
+
+    @keyframes hyperspaceBloom {
+      0% { opacity: 0; transform: scale(0.36) rotate(0deg); }
+      32% { opacity: 0.9; }
+      100% { opacity: 0; transform: scale(2.4) rotate(9deg); }
+    }
+
+    @keyframes irisPulse {
+      0%, 100% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 0.38; transform: scale(1.18); }
+    }
   </style>
 </head>
 <body>
@@ -324,6 +556,17 @@
       <button class="mission-card" data-dest="moon"><strong>Imbrium Haven</strong><span>Touch down where lunar night becomes a human address.</span></button>
     </div>
     <button id="closePanel">CLOSE</button>
+  </section>
+  <section id="cinemaOverlay" aria-live="polite" aria-hidden="true">
+    <div class="cinema-hyperspace"></div>
+    <div class="cinema-vignette"></div>
+    <div class="cinema-card">
+      <div class="cinema-kicker" id="cinemaKicker"></div>
+      <div class="cinema-title" id="cinemaTitle"></div>
+      <div class="cinema-subtitle" id="cinemaSubtitle"></div>
+      <div class="cinema-signature" id="cinemaSignature"></div>
+    </div>
+    <div class="cinema-crawl" id="cinemaCrawl"></div>
   </section>
   <div id="iris"></div>
 

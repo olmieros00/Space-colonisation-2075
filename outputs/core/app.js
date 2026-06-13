@@ -7,6 +7,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { UI, closePanel } from "./ui.js";
 import { camState, enterInspection, exitInspection, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
+import { readyCinemaFonts, showCinematicTitle } from "./cinema.js";
 import { travel } from "./transitions.js";
 import { buildHub } from "../scenes/hub.js";
 import { buildGateway } from "../scenes/gateway.js";
@@ -233,6 +234,10 @@ async function readyLabelFonts() {
 }
 
 await readyLabelFonts();
+await readyCinemaFonts();
 scenes.hub();
-UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 800, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
 animate();
+UI.iris.style.clipPath = "circle(150% at 50% 50%)";
+showCinematicTitle(UI, "boot", { duration: 3600 }).then(() => {
+  UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 900, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+});
