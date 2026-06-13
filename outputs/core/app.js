@@ -5,6 +5,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { UI, closePanel, openPanel, togglePanel } from "./ui.js";
+import { configureAssetLoading } from "./assets.js";
 import { camState, enterInspection, exitInspection, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
 import { readyCinemaFonts, showCinematicTitle } from "./cinema.js";
@@ -31,6 +32,7 @@ renderer.toneMappingExposure = 1.25;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 configureTextureLoading(renderer);
+configureAssetLoading(renderer);
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2400);
 const raycaster = new THREE.Raycaster();

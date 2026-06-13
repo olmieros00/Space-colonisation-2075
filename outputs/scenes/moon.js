@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addLights, glowRing, makeParticles, makeStars, mat } from "../core/materials.js";
+import { applyHDRIEnvironment } from "../core/assets.js";
 import { label } from "../core/labels.js";
 import { makeEnv } from "../core/pbr.js";
 import { setOrbit } from "../core/camera.js";
@@ -11,7 +12,7 @@ export function buildMoon(scene, camera, camState, interactive, animated, UI, tr
   UI.returnBtn.style.display = "block";
   UI.hint.textContent = "Circle the Mare Imbrium shelter. Wheel closer until Earth hangs over the roofline.";
   addLights(scene, state);
-  makeEnv(scene, state.renderer, "space");
+  applyHDRIEnvironment(scene, "space", () => makeEnv(scene, state.renderer, "space"));
   state.renderer.setClearColor(0x010207, 1);
   scene.fog = new THREE.FogExp2(0x010207, 0.012);
   UI.welcome.classList.remove("show");

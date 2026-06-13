@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { swapWithGLB } from "../../core/assets.js";
 import { addInteractive, cylinderBetween, label, mat } from "../../core/materials.js";
 
 const TWO_PI = Math.PI * 2;
@@ -269,6 +270,7 @@ function addHumanScaleMarkers(root) {
     figure.add(body, visor);
     figure.position.set(x, y, z);
     figure.rotation.y = (i % 2 ? 0.2 : -0.25) + (z > 0 ? Math.PI : 0);
+    swapWithGLB(figure, "assets/figure.glb", { height: 0.042 });
     root.add(figure);
   }
 }
@@ -423,6 +425,7 @@ function treadwellDroid(R, i, mats) {
   droid.userData.armB = armB;
   droid.userData.spark = spark;
   installCrawler(droid, i, R);
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R });
   return droid;
 }
 
@@ -453,6 +456,7 @@ function mouseDroid(R, i, mats) {
   droid.position.set(0, 0.018 * R, 0);
   droid.userData.redLamp = lamp;
   installCrawler(droid, i, R, true);
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.045 * R });
   return droid;
 }
 
@@ -483,6 +487,7 @@ function technicianDroid(R, i, mats) {
   droid.position.set(0, 0.027 * R, 0);
   droid.userData.head = head;
   installCrawler(droid, i, R);
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R });
   return droid;
 }
 
@@ -499,6 +504,7 @@ function buildProxyDroids(parent, R) {
     droid.add(body, dot);
     droid.position.y = 0.021 * R;
     installCrawler(droid, i, R, i % 4 === 0);
+    swapWithGLB(droid, "assets/droid.glb", { height: 0.04 * R });
     droids.add(droid);
   }
   parent.add(droids);

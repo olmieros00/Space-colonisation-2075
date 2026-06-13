@@ -21,6 +21,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ### core/
 | File | Edit when you need to change |
 |---|---|
+| assets.js | Optional GLB/HDRI loader pipeline with same-origin fallbacks |
 | app.js | Animation loop, renderer setup, shared state, scene switching, persistent destination-menu wiring |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
 | cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
@@ -62,6 +63,11 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 |---|---|
 | earth.glsl.js | Earth vertex + fragment shader strings, procedural fallback, atmosphere shader |
 | swarm.glsl.js | GPU satellite swarm vertex orbital motion and soft point fragment shader |
+
+### assets/
+| File | Purpose |
+|---|---|
+| README.md | Optional local asset manifest for `rocket.glb`, `droid.glb`, `figure.glb`, and HDRIs |
 
 ## Scale anchor
 `const R = 16` in `core/app.js` is Earth's radius in scene units. Orbit-scene objects are sized as multiples of `R`.

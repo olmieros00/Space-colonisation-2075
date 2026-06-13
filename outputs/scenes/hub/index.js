@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addInteractive } from "../../core/materials.js";
+import { applyHDRIEnvironment, swapWithGLB } from "../../core/assets.js";
 import { label } from "../../core/labels.js";
 import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
@@ -23,7 +24,7 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
   state.renderer.toneMappingExposure = 1.05;
   scene.fog = new THREE.FogExp2(0xd4e7f2, 0.00078);
   configureDaylight(scene, state);
-  makeEnv(scene, state.renderer, "day");
+  applyHDRIEnvironment(scene, "day", () => makeEnv(scene, state.renderer, "day"));
   addHorizonGround(scene);
   buildGround(scene);
 
@@ -34,6 +35,7 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
 
   const rocket = buildRocket();
   rocket.position.set(-24, 0.55, -2);
+  swapWithGLB(rocket, "assets/rocket.glb", { height: 24.6 });
   state.hubRocket = rocket;
   scene.add(addInteractive(interactive, rocket, "Colossus Heavy", () => travel("orbit"), "Click to light the engines and climb toward the blue world above"));
 

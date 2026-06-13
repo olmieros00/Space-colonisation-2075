@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addInteractive, glowRing, mat } from "../core/materials.js";
+import { applyHDRIEnvironment } from "../core/assets.js";
 import { label } from "../core/labels.js";
 import { box, cyl } from "../core/primitives.js";
 import { makeEnv } from "../core/pbr.js";
@@ -278,7 +279,7 @@ export function buildGateway(scene, camera, camState, interactive, animated, UI,
   state.renderer.toneMappingExposure = 0.46;
   scene.background = new THREE.Color(0xd8d8d2);
   scene.fog = new THREE.FogExp2(0xf2f2ec, 0.0025);
-  makeEnv(scene, state.renderer, "interior");
+  applyHDRIEnvironment(scene, "interior", () => makeEnv(scene, state.renderer, "interior"));
   scene.add(new THREE.AmbientLight(0xffffff, 0.95));
   scene.add(new THREE.HemisphereLight(0xffffff, 0xffe8b0, 0.58));
 

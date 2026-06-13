@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { swapWithGLB } from "../../core/assets.js";
 import { C, mat } from "../../core/materials.js";
 import { box, cyl } from "../../core/primitives.js";
 
@@ -26,6 +27,7 @@ function droid(group, x, z, scale = 1) {
   root.add(box(0.5 * scale, 0.28 * scale, 0.34 * scale, droidMat, 0, 1.92 * scale, 0));
   root.add(box(0.12 * scale, 0.08 * scale, 0.04 * scale, eyeMat, 0, 1.95 * scale, -0.18 * scale));
   root.add(box(0.08 * scale, 1.1 * scale, 0.08 * scale, mat.beskar, -0.42 * scale, 1.05 * scale, 0));
+  swapWithGLB(root, "assets/droid.glb", { height: 2.05 * scale });
   group.add(root);
 }
 
