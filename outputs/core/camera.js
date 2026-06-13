@@ -13,8 +13,26 @@ export const camState = {
   mouse: new THREE.Vector2(9, 9),
   focusTarget: new THREE.Vector3(),
   focusDistance: 41.6,
-  focusTween: null
+  focusTween: null,
+  focusedObject: null,
+  focusPauseRoot: null,
+  isFocused: false,
+  focusExitDistance: 0,
+  focusExitCallback: null
 };
+
+const tmpFocusWorld = new THREE.Vector3();
+
+function focusWorldPosition(obj) {
+  return obj.getWorldPosition(tmpFocusWorld);
+}
+
+function releaseFocusPause() {
+  if (camState.focusPauseRoot) {
+    camState.focusPauseRoot.userData.paused = false;
+    camState.focusPauseRoot = null;
+  }
+}
 
 export function setOrbit(target, distance, min, max, pitch, yaw = 0.55) {
   camState.orbitTarget.copy(target);
@@ -29,12 +47,20 @@ export function easeInOut(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-export function focusOnObject(obj, UI, R, closeDistance) {
+export function focusOnObject(obj, UI, R, closeDistance, options = {}) {
   const box = new THREE.Box3().setFromObject(obj);
   const size = box.getSize(new THREE.Vector3()).length() || R * 0.1;
-  const center = box.getCenter(new THREE.Vector3());
+  const center = box.isEmpty() ? focusWorldPosition(obj).clone() : box.getCenter(new THREE.Vector3());
+  releaseFocusPause();
+  camState.focusedObject = obj;
+  camState.focusPauseRoot = options.pauseRoot || obj.userData.pauseRoot || null;
+  camState.isFocused = true;
+  camState.focusExitDistance = options.exitDistance || 2.15 * R;
+  camState.orbitMin = options.orbitMin || 0.035 * R;
+  camState.orbitMax = options.orbitMax || 2.35 * R;
+  if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = true;
   camState.focusTarget.copy(center);
-  camState.focusDistance = closeDistance || THREE.MathUtils.clamp(size * 3, 0.18 * R, 1.8 * R);
+  camState.focusDistance = closeDistance || THREE.MathUtils.clamp(size * 3, 0.16 * R, 1.8 * R);
   camState.focusTween = {
     start: performance.now(),
     fromTarget: camState.orbitTarget.clone(),
@@ -46,6 +72,12 @@ export function focusOnObject(obj, UI, R, closeDistance) {
 }
 
 export function focusEarth(UI, R) {
+  releaseFocusPause();
+  camState.focusedObject = null;
+  camState.isFocused = false;
+  camState.focusExitDistance = 0;
+  camState.orbitMin = 1.02 * R;
+  camState.orbitMax = 6 * R;
   camState.focusTarget.set(0, 0, 0);
   camState.focusDistance = 2.6 * R;
   camState.focusTween = {
@@ -60,6 +92,10 @@ export function focusEarth(UI, R) {
 
 export function updateCamera(camera) {
   if (camState.focusTween) {
+    if (camState.isFocused && camState.focusedObject) {
+      camState.focusTween.toTarget.copy(focusWorldPosition(camState.focusedObject));
+      camState.focusTarget.copy(camState.focusTween.toTarget);
+    }
     const p = Math.min((performance.now() - camState.focusTween.start) / 1000, 1);
     const e = easeInOut(p);
     camState.orbitTarget.lerpVectors(camState.focusTween.fromTarget, camState.focusTween.toTarget, e);
@@ -68,6 +104,9 @@ export function updateCamera(camera) {
       if (camState.focusTween.hideButton) document.getElementById("earthViewBtn").style.display = "none";
       camState.focusTween = null;
     }
+  } else if (camState.isFocused && camState.focusedObject) {
+    camState.orbitTarget.copy(focusWorldPosition(camState.focusedObject));
+    camState.focusTarget.copy(camState.orbitTarget);
   }
 
   const x = Math.sin(camState.orbitYaw) * Math.cos(camState.orbitPitch) * camState.orbitDistance;
@@ -108,5 +147,8 @@ export function initCameraEvents(renderer, camera, state, onClickCallback, onMov
   });
   renderer.domElement.addEventListener("wheel", e => {
     state.orbitDistance = THREE.MathUtils.clamp(state.orbitDistance + e.deltaY * 0.025, state.orbitMin, state.orbitMax);
+    if (state.isFocused && state.focusExitDistance && state.orbitDistance >= state.focusExitDistance) {
+      state.focusExitCallback?.();
+    }
   }, { passive: true });
 }

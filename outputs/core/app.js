@@ -52,9 +52,14 @@ function resetScene() {
   state.hovered = null;
   state.hubRocket = null;
   state.activeSun = null;
+  if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = false;
   camState.focusTween = null;
   camState.focusTarget.set(0, 0, 0);
   camState.focusDistance = 2.6 * R;
+  camState.focusedObject = null;
+  camState.focusPauseRoot = null;
+  camState.isFocused = false;
+  camState.focusExitDistance = 0;
   if (UI.earthViewBtn) UI.earthViewBtn.style.display = "none";
   scene = new THREE.Scene();
   state.scene = scene;
@@ -66,8 +71,8 @@ function go(dest) {
   travel(dest, scenes, UI, state);
 }
 
-function focusOnObject(obj, closeDistance) {
-  focusCameraOnObject(obj, UI, R, closeDistance);
+function focusOnObject(obj, closeDistance, options) {
+  focusCameraOnObject(obj, UI, R, closeDistance, options);
 }
 
 const scenes = {
@@ -148,6 +153,7 @@ initCameraEvents(
 
 UI.returnBtn.addEventListener("click", () => go("hub"));
 UI.earthViewBtn.addEventListener("click", () => focusEarth(UI, R));
+camState.focusExitCallback = () => focusEarth(UI, R);
 document.getElementById("closePanel").addEventListener("click", closePanel);
 document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => go(btn.dataset.dest)));
 
