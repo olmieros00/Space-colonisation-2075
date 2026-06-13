@@ -7,7 +7,13 @@ export const UI = {
   welcome: document.getElementById("welcome"),
   returnBtn: document.getElementById("returnBtn"),
   earthViewBtn: document.getElementById("earthViewBtn"),
-  inspectBtn: document.getElementById("inspectBtn")
+  inspectBtn: document.getElementById("inspectBtn"),
+  cinema: document.getElementById("cinemaOverlay"),
+  cinemaKicker: document.getElementById("cinemaKicker"),
+  cinemaTitle: document.getElementById("cinemaTitle"),
+  cinemaSubtitle: document.getElementById("cinemaSubtitle"),
+  cinemaSignature: document.getElementById("cinemaSignature"),
+  cinemaCrawl: document.getElementById("cinemaCrawl")
 };
 
 export function openPanel() {
