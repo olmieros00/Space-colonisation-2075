@@ -5,6 +5,7 @@ import { buildConstellation } from "./constellation.js";
 import { buildEarth, moonMesh } from "./earth.js";
 import { buildStarcloud } from "./starcloud.js";
 import { buildStation } from "./station.js";
+import { buildSatelliteSwarm } from "./swarm.js";
 
 export function buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, travel, state, focusOnObject) {
   makeStars(scene);
@@ -24,6 +25,7 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   scene.add(moonLight);
 
   buildConstellation(scene, R, interactive, animated, satellites, focusOnObject);
+  buildSatelliteSwarm(scene, R, animated, camState);
   buildStation(scene, R, interactive, animated, travel);
   const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject, camState);
   scene.add(starcloud);
