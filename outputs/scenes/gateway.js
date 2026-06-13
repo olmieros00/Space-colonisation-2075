@@ -69,7 +69,7 @@ export function buildGateway(scene, camera, camState, interactive, animated, UI,
   shuttle.position.set(0, 1.25, -14.6);
   scene.add(shuttle);
   addInteractive(interactive, fuselage, "Mare Imbrium Transit", () => travel("moon"), "Docked Lunar Shuttle");
-  label(scene, "MARE IMBRIUM TRANSIT", new THREE.Vector3(0, 3.4, -14.4), 0.62);
+  label(scene, "MARE IMBRIUM TRANSIT", new THREE.Vector3(0, 3.4, -14.4), 0.62, "hero");
 
   setOrbit(new THREE.Vector3(0, 2.6, -6), 16, 6, 30, 0.1, 0.03);
 }

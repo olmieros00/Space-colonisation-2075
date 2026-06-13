@@ -309,7 +309,7 @@ function buildTowers(scene) {
     }
     scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: 0x4b545c, transparent: true, opacity: 0.75 })));
   }
-  label(scene, "MECHAZILLA CATCH TOWER", new THREE.Vector3(-17.3, 25.2, -6.2), 0.48, "#2b3034");
+  label(scene, "MECHAZILLA CATCH TOWER", new THREE.Vector3(-17.3, 25.2, -6.2), 0.48, "subsystem");
 }
 
 function buildFacility(scene, interactive) {
@@ -347,7 +347,7 @@ function buildFacility(scene, interactive) {
   control.add(base, dome);
   control.position.set(28, 0, -26);
   scene.add(addInteractive(interactive, shadowAll(control), "Mission Control", () => openPanel(), "Open hub-and-spoke mission panel"));
-  label(scene, "MISSION CONTROL", new THREE.Vector3(28, 8.4, -29), 0.5, "#2b3034");
+  label(scene, "MISSION CONTROL", new THREE.Vector3(28, 8.4, -29), 0.5, "subsystem");
 }
 
 function buildDisplayBooster(scene) {
@@ -358,7 +358,7 @@ function buildDisplayBooster(scene) {
   scene.add(booster);
   const plinth = box(5.2, 0.35, 5.2, new THREE.MeshStandardMaterial({ color: 0x73766f, roughness: 0.8 }), 29, 0.18, -37);
   scene.add(plinth);
-  label(scene, "DISPLAY BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "#2b3034");
+  label(scene, "DISPLAY BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "subsystem");
 }
 
 function buildProps(scene) {
@@ -456,6 +456,6 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
   scene.add(addInteractive(interactive, rocket, "Colossus Launch Vehicle", () => travel("orbit"), "Click to ignite and ascend into Earth orbit"));
 
   buildTowers(scene);
-  label(scene, "LAUNCH COMPLEX COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "#2b3034");
+  label(scene, "LAUNCH COMPLEX COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "hero");
   setOrbit(new THREE.Vector3(-24, 6.1, -3), 44, 18, 82, 0.15, 0.95);
 }

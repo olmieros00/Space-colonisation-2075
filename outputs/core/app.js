@@ -190,6 +190,24 @@ camState.focusExitCallback = () => focusEarth(UI, R);
 document.getElementById("closePanel").addEventListener("click", closePanel);
 document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => go(btn.dataset.dest)));
 
+async function readyLabelFonts() {
+  if (!document.fonts) return;
+  const loads = [
+    document.fonts.load("900 48px Orbitron"),
+    document.fonts.load("700 48px Orbitron"),
+    document.fonts.load("48px Audiowide"),
+    document.fonts.load("800 42px Oxanium"),
+    document.fonts.load("600 42px Oxanium"),
+    document.fonts.load("600 34px Saira Condensed"),
+    document.fonts.load("28px Share Tech Mono")
+  ];
+  await Promise.race([
+    Promise.allSettled(loads).then(() => document.fonts.ready),
+    new Promise(resolve => setTimeout(resolve, 2500))
+  ]);
+}
+
+await readyLabelFonts();
 scenes.hub();
 UI.iris.animate([{ clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)" }], { duration: 800, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
 animate();

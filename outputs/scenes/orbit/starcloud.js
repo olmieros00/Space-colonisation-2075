@@ -542,9 +542,9 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
   animated.push(group);
   addInteractive(interactive, hit, "STARCLOUD ATLAS-CLASS", focusStarcloud, "Atlas-class ~50GW orbital data center · service-droid maintained · laser mesh uplinks");
   hit.userData.focusable = true;
-  const title = label(scene, "STARCLOUD ATLAS-CLASS · ~50GW · ORBITAL DATA CENTER", new THREE.Vector3(), 0.54);
+  const title = label(scene, "STARCLOUD ATLAS-CLASS · ~50GW · ORBITAL DATA CENTER", new THREE.Vector3(), 0.54, "hero");
   title.position.set(0, 0.54 * R, 0);
-  const sub = label(scene, "DARK SOLAR WINGS · DRAGON SERVICE CAPSULE · LASER COMM ARRAY", new THREE.Vector3(), 0.4, "#ff9a3c");
+  const sub = label(scene, "DARK SOLAR WINGS · DRAGON SERVICE CAPSULE · LASER COMM ARRAY", new THREE.Vector3(), 0.4, "telemetry");
   sub.position.set(0, 0.42 * R, 0);
   group.add(title, sub);
   return group;

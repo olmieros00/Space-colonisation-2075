@@ -71,23 +71,125 @@ export function addLights(scene, state, atmospheric = false) {
   scene.add(amber);
 }
 
-export function label(scene, text, pos, size = 0.9, color = "#e8e8e0") {
+const labelTiers = {
+  hero: {
+    font: "900 54px Orbitron, Audiowide, sans-serif",
+    altFont: "54px Audiowide, Orbitron, sans-serif",
+    fill: "#ffd23f",
+    stroke: "#5e4500",
+    strokeWidth: 4,
+    glow: "#ffae00",
+    glowBlur: 14,
+    spacing: 6,
+    panelAlpha: 0.34,
+    y: 146
+  },
+  subsystem: {
+    font: "800 46px Oxanium, sans-serif",
+    fill: "#e8e8e0",
+    stroke: "rgba(6,8,12,0.9)",
+    strokeWidth: 3,
+    glow: "#ff9a3c",
+    glowBlur: 7,
+    spacing: 4,
+    panelAlpha: 0.42,
+    y: 146
+  },
+  telemetry: {
+    font: "28px Share Tech Mono, monospace",
+    fill: "rgba(232,232,224,0.72)",
+    stroke: "rgba(6,8,12,0.72)",
+    strokeWidth: 2,
+    glow: null,
+    glowBlur: 0,
+    spacing: 1.5,
+    panelAlpha: 0.32,
+    y: 142
+  }
+};
+
+function labelOptions(tierOrColor, maybeOptions) {
+  const knownTier = typeof tierOrColor === "string" && labelTiers[tierOrColor];
+  if (knownTier) return { tier: tierOrColor, ...maybeOptions };
+  if (typeof tierOrColor === "string") return { tier: "subsystem", color: tierOrColor, ...maybeOptions };
+  return { tier: "subsystem", ...(tierOrColor || {}) };
+}
+
+function drawTrackedText(ctx, text, x, y, tracking, stroke = false) {
+  const letters = Array.from(text.toUpperCase());
+  let cursor = x;
+  for (const letter of letters) {
+    if (stroke) ctx.strokeText(letter, cursor, y);
+    else ctx.fillText(letter, cursor, y);
+    cursor += ctx.measureText(letter).width + tracking;
+  }
+}
+
+function trackedWidth(ctx, text, tracking) {
+  return Array.from(text.toUpperCase()).reduce((sum, letter) => sum + ctx.measureText(letter).width + tracking, -tracking);
+}
+
+function scaleFont(font, factor) {
+  return font.replace(/(\d+(?:\.\d+)?)px/g, (_, px) => `${Math.max(18, Number(px) * factor)}px`);
+}
+
+export function label(scene, text, pos, size = 0.9, tierOrColor = "subsystem", maybeOptions = {}) {
+  const opts = labelOptions(tierOrColor, maybeOptions);
+  const tier = labelTiers[opts.tier] || labelTiers.subsystem;
+  const heroAlt = opts.tier === "hero" && text.length % 2 === 0;
   const cnv = document.createElement("canvas");
-  cnv.width = 768;
-  cnv.height = 128;
+  cnv.width = 1024;
+  cnv.height = 256;
   const ctx = cnv.getContext("2d");
   ctx.clearRect(0, 0, cnv.width, cnv.height);
-  ctx.font = "36px Courier New";
-  ctx.fillStyle = "rgba(0,0,0,.45)";
-  ctx.fillRect(0, 16, cnv.width, 74);
-  ctx.strokeStyle = "rgba(255,154,60,.75)";
-  ctx.strokeRect(4, 20, cnv.width - 8, 66);
-  ctx.fillStyle = color;
-  ctx.fillText(text, 26, 66);
+  ctx.font = heroAlt ? tier.altFont : tier.font;
+  ctx.textBaseline = "middle";
+
+  ctx.fillStyle = `rgba(4,6,10,${tier.panelAlpha})`;
+  ctx.fillRect(18, 58, cnv.width - 36, 112);
+  ctx.strokeStyle = "rgba(255,154,60,.68)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(24, 64, cnv.width - 48, 100);
+
+  let tracking = tier.spacing;
+  let fitWidth = trackedWidth(ctx, text, tracking);
+  let attempts = 0;
+  while (fitWidth > 930 && attempts < 10) {
+    ctx.font = scaleFont(ctx.font, 0.92);
+    tracking *= 0.9;
+    fitWidth = trackedWidth(ctx, text, tracking);
+    attempts++;
+  }
+  const x = Math.max(36, (cnv.width - trackedWidth(ctx, text, tracking)) * 0.5);
+  const y = tier.y;
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = opts.stroke || tier.stroke;
+  ctx.lineWidth = opts.strokeWidth || tier.strokeWidth;
+  drawTrackedText(ctx, text, x, y, tracking, true);
+
+  if (tier.glow) {
+    ctx.shadowColor = tier.glow;
+    ctx.shadowBlur = tier.glowBlur;
+  }
+
+  if (opts.tier === "hero") {
+    const gradient = ctx.createLinearGradient(0, 78, 0, 166);
+    gradient.addColorStop(0, "#fff2a6");
+    gradient.addColorStop(0.54, opts.color || tier.fill);
+    gradient.addColorStop(1, "#ff9a3c");
+    ctx.fillStyle = gradient;
+  } else {
+    ctx.fillStyle = opts.color || tier.fill;
+  }
+  drawTrackedText(ctx, text, x, y, tracking, false);
+  ctx.shadowBlur = 0;
+
   const texture = new THREE.CanvasTexture(cnv);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = maxAnisotropy;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false }));
   sprite.position.copy(pos);
-  sprite.scale.set(size * 6, size, 1);
+  sprite.scale.set(size * 7.2, size * 1.8, 1);
   scene.add(sprite);
   return sprite;
 }

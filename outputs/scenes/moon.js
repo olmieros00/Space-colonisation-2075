@@ -49,10 +49,10 @@ export function buildMoon(scene, camera, camState, interactive, animated, UI, tr
   const sign = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.2, 0.18), mat.dark);
   sign.position.set(3.3, 1.3, -5.7);
   scene.add(sign);
-  label(scene, "GRU HOTEL — MARE IMBRIUM • EST. 2032", new THREE.Vector3(3.3, 2.55, -5.55), 0.43);
-  label(scene, "YC  BACKED BY Y COMBINATOR", new THREE.Vector3(0.6, 1.3, -4.5), 0.32, "#ff9a3c");
-  label(scene, "NVIDIA", new THREE.Vector3(5.7, 1.3, -4.5), 0.32, "#83d14f");
-  label(scene, "GRU HOTEL", new THREE.Vector3(10, 5.7, -12), 0.74);
+  label(scene, "GRU HOTEL — MARE IMBRIUM • EST. 2032", new THREE.Vector3(3.3, 2.55, -5.55), 0.43, "subsystem");
+  label(scene, "YC  BACKED BY Y COMBINATOR", new THREE.Vector3(0.6, 1.3, -4.5), 0.32, "telemetry");
+  label(scene, "NVIDIA", new THREE.Vector3(5.7, 1.3, -4.5), 0.32, "subsystem");
+  label(scene, "GRU HOTEL", new THREE.Vector3(10, 5.7, -12), 0.74, "hero");
 
   const entryGlow = glowRing(1.25, 0.04);
   entryGlow.position.copy(state.hotelEntrance).add(new THREE.Vector3(0, 1.2, 0));

@@ -70,6 +70,6 @@ export function buildStation(scene, R, interactive, animated, travel) {
   );
   gatewayHit.position.copy(gateway.position);
   scene.add(addInteractive(interactive, gatewayHit, "Gateway Station", () => travel("gateway"), "Click to enter docking bay interior"));
-  label(scene, "GATEWAY STATION", gateway.position.clone().add(new THREE.Vector3(0, 0.45 * R, 0)), 0.68);
+  label(scene, "GATEWAY STATION", gateway.position.clone().add(new THREE.Vector3(0, 0.45 * R, 0)), 0.68, "subsystem");
   return gateway;
 }
