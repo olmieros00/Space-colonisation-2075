@@ -21,7 +21,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ### core/
 | File | Edit when you need to change |
 |---|---|
-| app.js | Animation loop, renderer setup, shared state, scene switching |
+| app.js | Animation loop, renderer setup, shared state, scene switching, persistent destination-menu wiring |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
 | cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
 | constants.js | Shared scale constants, currently `R = 16` |
@@ -29,7 +29,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | materials.js | Shared colour palette, material definitions, stars, texture loading |
 | primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
-| ui.js | DOM element refs, mission panel open/close |
+| ui.js | DOM element refs, mission panel open/close/toggle |
 | walkCamera.js | Pointer-lock first-person deck walking and collision for the Starcloud scene |
 
 ### scenes/
@@ -67,6 +67,9 @@ When Starcloud Atlas is focused, `ENTER STRUCTURE` appears above the Earth View 
 Starcloud orbit model scale: the ~8 unit footprint represents ~358m, so human-scale references use ~0.0224 units per meter.
 
 Starcloud first-person scene scale: `1 unit = 1 metre`. The walkable district is roughly 300m x 120m, with low-detail solar-array and hull vistas extending kilometres along the structure. `ENTER STRUCTURE` from the focused orbit Starcloud now travels to this scene; `RETURN TO ORBIT` travels back to Earth orbit.
+
+## Navigation
+The persistent `MENU` button is visible in every scene and opens the mission panel. Press `M` to toggle the same panel; in pointer-lock scenes this also releases pointer lock. The panel routes to all five destinations: Hub, Orbit, Gateway, Moon, and Starcloud.
 
 ## Dependency rules
 - `core/app.js` imports from scene files and owns shared mutable state.

@@ -5,6 +5,7 @@ export const UI = {
   panel: document.getElementById("missionPanel"),
   iris: document.getElementById("iris"),
   welcome: document.getElementById("welcome"),
+  menuBtn: document.getElementById("menuBtn"),
   returnBtn: document.getElementById("returnBtn"),
   earthViewBtn: document.getElementById("earthViewBtn"),
   inspectBtn: document.getElementById("inspectBtn"),
@@ -22,4 +23,8 @@ export function openPanel() {
 
 export function closePanel() {
   UI.panel.classList.remove("open");
+}
+
+export function togglePanel() {
+  UI.panel.classList.toggle("open");
 }

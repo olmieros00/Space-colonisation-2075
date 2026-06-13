@@ -73,7 +73,7 @@
       filter: drop-shadow(0 0 8px rgba(255, 154, 60, 0.8));
     }
 
-    #returnBtn, .mission-card, #closePanel {
+    #returnBtn, #menuBtn, .mission-card, #closePanel {
       font: 700 14px "Russo One", "Oxanium", sans-serif;
       letter-spacing: 0.07em;
       text-transform: uppercase;
@@ -94,6 +94,17 @@
       clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
       z-index: 6;
       display: none;
+    }
+
+    #menuBtn {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      min-width: 132px;
+      height: 44px;
+      padding: 0 18px;
+      clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+      z-index: 6;
     }
 
     #location {
@@ -121,7 +132,7 @@
       min-width: 196px;
     }
 
-    #returnBtn:hover, #earthViewBtn:hover, .mission-card:hover, #closePanel:hover {
+    #returnBtn:hover, #menuBtn:hover, #earthViewBtn:hover, .mission-card:hover, #closePanel:hover {
       border-color: var(--amber);
       background: rgba(255, 154, 60, 0.16);
       transform: translateY(-1px);
@@ -543,6 +554,7 @@
   <canvas id="scene"></canvas>
   <div id="hint"></div>
   <div id="hud"><span class="visor"></span><span id="location">FRONTIER 2075 // STARBASE TEXAS</span></div>
+  <button id="menuBtn">MENU</button>
   <button id="returnBtn">RETURN TO FIRST LIGHT</button>
   <button id="earthViewBtn">↺ EARTH VIEW</button>
   <button id="inspectBtn">ENTER STRUCTURE</button>
@@ -551,9 +563,11 @@
   <section id="missionPanel" aria-label="Mission Control">
     <h2>FRONTIER MISSION ROUTES</h2>
     <div class="mission-grid">
+      <button class="mission-card" data-dest="hub"><strong>First Light</strong><span>Return to Starbase Texas and the Colossus launch coast.</span></button>
       <button class="mission-card" data-dest="orbit"><strong>The First Climb</strong><span>Ride Colossus from the Texas coast into the Guardian Net.</span></button>
       <button class="mission-card" data-dest="gateway"><strong>The Crossing</strong><span>Enter Gateway Station, the spinning city between Earth and Moon.</span></button>
       <button class="mission-card" data-dest="moon"><strong>Imbrium Haven</strong><span>Touch down where lunar night becomes a human address.</span></button>
+      <button class="mission-card" data-dest="starcloud"><strong>Starcloud Atlas</strong><span>Walk the kilometre-scale orbital data center beyond the swarm.</span></button>
     </div>
     <button id="closePanel">CLOSE</button>
   </section>

@@ -4,7 +4,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { UI, closePanel } from "./ui.js";
+import { UI, closePanel, openPanel, togglePanel } from "./ui.js";
 import { camState, enterInspection, exitInspection, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
 import { readyCinemaFonts, showCinematicTitle } from "./cinema.js";
@@ -211,6 +211,7 @@ initCameraEvents(
 );
 
 UI.returnBtn.addEventListener("click", () => go(state.mode === "starcloud" ? "orbit" : "hub"));
+UI.menuBtn.addEventListener("click", () => openPanel());
 UI.earthViewBtn.addEventListener("click", () => focusEarth(UI, R));
 if (UI.inspectBtn) {
   UI.inspectBtn.addEventListener("click", () => {
@@ -221,7 +222,15 @@ if (UI.inspectBtn) {
 }
 camState.focusExitCallback = () => focusEarth(UI, R);
 document.getElementById("closePanel").addEventListener("click", closePanel);
-document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => go(btn.dataset.dest)));
+document.addEventListener("keydown", e => {
+  if (e.code !== "KeyM" || e.repeat) return;
+  if (document.pointerLockElement) document.exitPointerLock?.();
+  togglePanel();
+});
+document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => {
+  closePanel();
+  go(btn.dataset.dest);
+}));
 
 async function readyLabelFonts() {
   if (!document.fonts) return;
