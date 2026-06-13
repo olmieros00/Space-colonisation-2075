@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { makeStars, mat } from "../../core/materials.js";
+import { makeEnv } from "../../core/pbr.js";
 import { buildConstellationField } from "./constellation.js";
 import { buildHabitationLayer } from "./habitation.js";
 import { buildDeckProps } from "./props.js";
@@ -50,6 +51,7 @@ export function buildStarcloudScene(scene, camera, camState, interactive, animat
   camState.inputMode = "walk";
   scene.fog = new THREE.FogExp2(0x02040a, 0.00018);
   state.renderer.setClearColor(0x02040a, 1);
+  makeEnv(scene, state.renderer, "space");
   camera.near = 1;
   camera.far = 40000;
   camera.updateProjectionMatrix();

@@ -27,6 +27,8 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | constants.js | Shared scale constants, currently `R = 16` |
 | labels.js | Canvas sprite label system and label-tier typography |
 | materials.js | Shared colour palette, material definitions, stars, texture loading |
+| pbr.js | Procedural hard-surface PBR maps and per-scene PMREM environment maps |
+| greeble.js | Lightweight instanced panels, bolts, and vents for large bare surfaces |
 | primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
 | ui.js | DOM element refs, mission panel open/close/toggle |

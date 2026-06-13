@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { addInteractive } from "../../core/materials.js";
 import { label } from "../../core/labels.js";
+import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
 import { addHorizonGround, configureDaylight } from "./environment.js";
 import { buildRocket } from "./rocket.js";
@@ -22,6 +23,7 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
   state.renderer.toneMappingExposure = 1.05;
   scene.fog = new THREE.FogExp2(0xd4e7f2, 0.00078);
   configureDaylight(scene, state);
+  makeEnv(scene, state.renderer, "day");
   addHorizonGround(scene);
   buildGround(scene);
 

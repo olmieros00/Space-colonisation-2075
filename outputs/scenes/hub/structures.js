@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addInteractive } from "../../core/materials.js";
+import { greeble } from "../../core/greeble.js";
 import { label } from "../../core/labels.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 import { openPanel } from "../../core/ui.js";
@@ -134,6 +135,15 @@ export function buildFacility(scene, interactive) {
   for (let i = -2; i <= 2; i++) {
     building.add(box(2.2, 0.65, 1.7, dark, i * 5.8, 6.7, -3.5));
   }
+  greeble(building, {
+    center: new THREE.Vector3(0, 3.25, 5.43),
+    normal: new THREE.Vector3(0, 0, 1),
+    width: 38,
+    height: 5.1,
+    minSize: 0.08,
+    maxSize: 0.34,
+    depth: 0.018
+  }, 220);
   building.position.set(9, 0, -35);
   scene.add(addInteractive(interactive, shadowAll(building), "Frontier Starbase Campus", () => openPanel(), "Open the route map from Texas to the Moon"));
   label(scene, "FIRST LIGHT CAMPUS", new THREE.Vector3(9, 9.0, -40), 0.46, "subsystem");

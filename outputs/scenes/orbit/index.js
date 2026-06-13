@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addLights, makeStars } from "../../core/materials.js";
+import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
 import { buildConstellation } from "./constellation.js";
 import { buildEarth, moonMesh } from "./earth.js";
@@ -15,6 +16,7 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   UI.returnBtn.style.display = "block";
   UI.hint.textContent = "Orbit the blue homeworld. Hover Guardian Prime or Starcloud Atlas. Click a landmark to move closer.";
   addLights(scene, state);
+  makeEnv(scene, state.renderer, "space");
   buildSolarSystem(scene, state);
   scene.fog = null;
   buildEarth(scene, R, animated, state);

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { greeble } from "../../core/greeble.js";
 import { mat } from "../../core/materials.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 
@@ -101,6 +102,15 @@ function addDataSpine(group, colliders) {
   group.add(box(36, 4, 4000, mat.dark, 0, 29, 0));
   group.add(box(7, 7, 4000, mat.beskar, -21, 12, 0));
   group.add(box(7, 7, 4000, mat.beskar, 21, 12, 0));
+  greeble(group, {
+    center: new THREE.Vector3(0, 31.05, 0),
+    normal: new THREE.Vector3(0, 1, 0),
+    width: 3800,
+    height: 28,
+    minSize: 1.2,
+    maxSize: 5.5,
+    depth: 0.32
+  }, 360);
   unitCollider(colliders, 38, 34, 450, 0, 16, 0);
   addContainers(group, colliders);
 }

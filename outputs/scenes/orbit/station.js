@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { addInteractive, cylinderBetween, mat } from "../../core/materials.js";
+import { greeble } from "../../core/greeble.js";
 import { label } from "../../core/labels.js";
 import { box, cyl } from "../../core/primitives.js";
 
@@ -220,6 +221,15 @@ function buildGatewayStation(R, animated) {
   }
   addBuddingModules(station, R);
   addBerthedCapsule(station, R);
+  greeble(station, {
+    center: new THREE.Vector3(0, 0.060 * R, 0),
+    normal: new THREE.Vector3(0, 1, 0),
+    width: 0.68 * R,
+    height: 0.18 * R,
+    minSize: 0.005 * R,
+    maxSize: 0.026 * R,
+    depth: 0.0018 * R
+  }, 260);
   return station;
 }
 

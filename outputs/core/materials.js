@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { makePBR, setPBRAnisotropy } from "./pbr.js";
 
 export const C = {
   beskar: 0x7a8a9c,
@@ -10,10 +11,10 @@ export const C = {
 };
 
 export const mat = {
-  beskar: new THREE.MeshStandardMaterial({ color: C.beskar, metalness: 0.62, roughness: 0.36 }),
-  dark: new THREE.MeshStandardMaterial({ color: C.charcoal, metalness: 0.34, roughness: 0.62 }),
-  white: new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.42 }),
-  black: new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.5, roughness: 0.36 }),
+  beskar: makePBR({ color: C.beskar, metalness: 0.62, roughness: 0.36, normalScale: 0.66, repeat: 2.5 }),
+  dark: makePBR({ color: C.charcoal, metalness: 0.34, roughness: 0.62, normalScale: 0.52, repeat: 2.2 }),
+  white: makePBR({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.42, normalScale: 0.48, repeat: 2 }),
+  black: makePBR({ color: 0x050609, metalness: 0.5, roughness: 0.36, normalScale: 0.42, repeat: 2.4 }),
   amber: new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.95, transparent: true, opacity: 0.82 }),
   glass: new THREE.MeshPhysicalMaterial({ color: 0x7cc7ff, metalness: 0, roughness: 0.05, transmission: 0.45, transparent: true, opacity: 0.35 }),
   regolith: new THREE.MeshStandardMaterial({ color: 0x7f817d, roughness: 0.92 }),
@@ -27,6 +28,7 @@ let maxAnisotropy = 1;
 
 export function configureTextureLoading(renderer) {
   maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+  setPBRAnisotropy(maxAnisotropy);
 }
 
 export function getMaxAnisotropy() {
