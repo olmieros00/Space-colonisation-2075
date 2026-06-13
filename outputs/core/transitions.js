@@ -88,5 +88,6 @@ export function travel(dest, scenes, UI, state) {
   }
   if (dest === "gateway") irisWipe(UI, scenes.gateway, "gateway", { variant: "iris" });
   if (dest === "moon") irisWipe(UI, scenes.moon, "moon", { variant: "crawl" });
+  if (dest === "starcloud") irisWipe(UI, scenes.starcloud, "starcloud", { variant: "iris" });
   if (dest === "hub") irisWipe(UI, scenes.hub, "hub", { variant: "iris" });
 }

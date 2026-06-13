@@ -30,6 +30,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
 | ui.js | DOM element refs, mission panel open/close |
+| walkCamera.js | Pointer-lock first-person deck walking and collision for the Starcloud scene |
 
 ### scenes/
 | File | Edit when you need to change |
@@ -44,6 +45,10 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, inspection massing, habitation silhouettes |
 | orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub |
+| starcloud/index.js | Starcloud first-person scene orchestration, camera setup, UI state |
+| starcloud/structure.js | Walkable deck, collision bounds, central spine, kilometre-scale vista silhouette |
+| starcloud/buildings.js | Habitation building massing and building colliders |
+| starcloud/props.js | Deck crates, antennae, and simple droid scale references |
 
 ### shaders/
 | File | Edit when you need to change |
@@ -59,7 +64,9 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ## Starcloud inspection mode
 When Starcloud Atlas is focused, `ENTER STRUCTURE` appears above the Earth View button. It switches the shared orbit camera into a Starcloud-only inspection sub-state with a local pivot on the structure, `near = 0.01`, `far = 200`, and inspection zoom bounds of `0.05` to `3` scene units. `↺ EXIT STRUCTURE` returns to the normal Starcloud focus view; `↺ EARTH VIEW` still resets to the Earth-orbit camera.
 
-Starcloud local scale: the ~8 unit footprint represents ~358m, so human-scale references use ~0.0224 units per meter. Pass A includes simple human figures, correctly scaled service droids, and habitation-pod massing only; interiors and detailed figures are intentionally left for a later pass.
+Starcloud orbit model scale: the ~8 unit footprint represents ~358m, so human-scale references use ~0.0224 units per meter.
+
+Starcloud first-person scene scale: `1 unit = 1 metre`. The walkable district is roughly 300m x 120m, with low-detail solar-array and hull vistas extending kilometres along the structure. `ENTER STRUCTURE` from the focused orbit Starcloud now travels to this scene; `RETURN TO ORBIT` travels back to Earth orbit.
 
 ## Dependency rules
 - `core/app.js` imports from scene files and owns shared mutable state.

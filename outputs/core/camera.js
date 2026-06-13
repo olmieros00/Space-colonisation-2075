@@ -12,6 +12,7 @@ export const camState = {
   dragMoved: false,
   down: { x: 0, y: 0 },
   mouse: new THREE.Vector2(9, 9),
+  inputMode: "orbit",
   focusTarget: new THREE.Vector3(),
   focusDistance: 2.6 * R,
   focusTween: null,
@@ -20,6 +21,7 @@ export const camState = {
   isFocused: false,
   focusExitDistance: 0,
   focusExitCallback: null,
+  structureDestination: null,
   canInspect: false,
   inspectionActive: false,
   inspectionRoot: null,
@@ -106,6 +108,7 @@ export function focusEarth(UI, R) {
   camState.focusedObject = null;
   camState.isFocused = false;
   camState.canInspect = false;
+  camState.structureDestination = null;
   camState.inspectionRoot = null;
   camState.focusExitDistance = 0;
   camState.orbitMin = 1.02 * R;
@@ -235,6 +238,7 @@ export function normalizedMouse(renderer, event) {
 
 export function initCameraEvents(renderer, camera, state, onClickCallback, onMoveCallback) {
   renderer.domElement.addEventListener("pointerdown", e => {
+    if (state.inputMode === "walk") return;
     state.dragging = true;
     state.dragMoved = false;
     state.down.x = e.clientX;
@@ -242,6 +246,7 @@ export function initCameraEvents(renderer, camera, state, onClickCallback, onMov
     renderer.domElement.setPointerCapture(e.pointerId);
   });
   renderer.domElement.addEventListener("pointermove", e => {
+    if (state.inputMode === "walk") return;
     normalizedMouse(renderer, e);
     onMoveCallback?.(e);
     if (state.dragging) {
@@ -252,11 +257,13 @@ export function initCameraEvents(renderer, camera, state, onClickCallback, onMov
     }
   });
   renderer.domElement.addEventListener("pointerup", e => {
+    if (state.inputMode === "walk") return;
     state.dragging = false;
     normalizedMouse(renderer, e);
     onClickCallback?.(e);
   });
   renderer.domElement.addEventListener("wheel", e => {
+    if (state.inputMode === "walk") return;
     state.orbitDistance = THREE.MathUtils.clamp(state.orbitDistance + e.deltaY * 0.025, state.orbitMin, state.orbitMax);
     if (state.isFocused && state.focusExitDistance && state.orbitDistance >= state.focusExitDistance) {
       state.focusExitCallback?.();

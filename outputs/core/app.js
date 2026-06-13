@@ -10,11 +10,13 @@ import { C, configureTextureLoading } from "./materials.js";
 import { readyCinemaFonts, showCinematicTitle } from "./cinema.js";
 import { R } from "./constants.js";
 import { travel } from "./transitions.js";
+import { createWalkCamera } from "./walkCamera.js";
 import { buildHub } from "../scenes/hub/index.js";
 import { buildGateway } from "../scenes/gateway.js";
 import { buildMoon } from "../scenes/moon.js";
 import { buildOrbit } from "../scenes/orbit/index.js";
 import { updateConstellation } from "../scenes/orbit/constellation.js";
+import { buildStarcloudScene } from "../scenes/starcloud/index.js";
 import { earthMesh, moonMesh } from "../scenes/orbit/earth.js";
 
 const canvas = document.getElementById("scene");
@@ -33,6 +35,7 @@ configureTextureLoading(renderer);
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2400);
 const raycaster = new THREE.Raycaster();
 const clock = new THREE.Clock();
+const walkController = createWalkCamera(renderer.domElement, camera);
 const interactive = [];
 const satellites = [];
 const animated = [];
@@ -75,6 +78,7 @@ function resetScene() {
   satellites.length = 0;
   animated.length = 0;
   state.hovered = null;
+  walkController.deactivate();
   state.hubRocket = null;
   state.activeSun = null;
   if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = false;
@@ -83,6 +87,8 @@ function resetScene() {
   camState.focusDistance = 2.6 * R;
   camState.focusedObject = null;
   camState.focusPauseRoot = null;
+  camState.inputMode = "orbit";
+  camState.structureDestination = null;
   camState.isFocused = false;
   camState.canInspect = false;
   camState.inspectionActive = false;
@@ -114,8 +120,9 @@ function go(dest) {
   travel(dest, scenes, UI, state);
 }
 
-function focusOnObject(obj, closeDistance, options) {
+function focusOrbitObject(obj, closeDistance, options) {
   focusCameraOnObject(obj, UI, R, closeDistance, options);
+  camState.structureDestination = options?.canInspect && options?.pauseRoot?.userData?.droidTier !== undefined ? "starcloud" : null;
 }
 
 const scenes = {
@@ -125,7 +132,7 @@ const scenes = {
   },
   orbit: () => {
     resetScene();
-    buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, go, state, focusOnObject);
+    buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, go, state, focusOrbitObject);
   },
   gateway: () => {
     resetScene();
@@ -134,6 +141,10 @@ const scenes = {
   moon: () => {
     resetScene();
     buildMoon(scene, camera, camState, interactive, animated, UI, go, state, assets);
+  },
+  starcloud: () => {
+    resetScene();
+    buildStarcloudScene(scene, camera, camState, interactive, animated, UI, go, state, walkController);
   }
 };
 
@@ -166,9 +177,11 @@ function animate() {
   requestAnimationFrame(animate);
   if (state.mode === "orbit") updateConstellation(satellites, t);
   for (const a of animated) if (a.userData.tick) a.userData.tick(t, dt);
-  updateCamera(camera, camState, dt);
+  if (state.mode === "starcloud") walkController.update(dt);
+  else updateCamera(camera, camState, dt);
   if (state.mode === "moon") UI.welcome.classList.toggle("show", camState.orbitDistance < 15);
-  pick();
+  if (state.mode === "starcloud") UI.tooltip.style.opacity = 0;
+  else pick();
   composer.render();
 }
 
@@ -197,11 +210,12 @@ initCameraEvents(
   }
 );
 
-UI.returnBtn.addEventListener("click", () => go("hub"));
+UI.returnBtn.addEventListener("click", () => go(state.mode === "starcloud" ? "orbit" : "hub"));
 UI.earthViewBtn.addEventListener("click", () => focusEarth(UI, R));
 if (UI.inspectBtn) {
   UI.inspectBtn.addEventListener("click", () => {
-    if (camState.inspectionActive || camState.inspectionTween) exitInspection(camera, UI);
+    if (camState.structureDestination && !camState.inspectionActive && !camState.inspectionTween) go(camState.structureDestination);
+    else if (camState.inspectionActive || camState.inspectionTween) exitInspection(camera, UI);
     else enterInspection(camera, UI);
   });
 }
