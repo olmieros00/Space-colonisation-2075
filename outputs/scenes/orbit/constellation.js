@@ -104,7 +104,7 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
   };
   if (prime) {
     g.userData.focusable = true;
-    addInteractive(interactive, body, name, () => focusOnObject(g), "AI Data Center Node — 150kW peak");
+    addInteractive(interactive, body, name, () => focusOnObject(g), "The first bright node of the Guardian Net");
   }
   satellites.push(g);
   scene.add(g);
@@ -125,7 +125,7 @@ export function buildConstellation(scene, R, interactive, animated, satellites, 
     for (let j = 0; j < SATELLITES_PER_PLANE; j++) {
       const phase = j * (Math.PI * 2 / SATELLITES_PER_PLANE) + k * 0.07;
       const isPrime = k === 0 && j === 0;
-      satellite(scene, R, interactive, satellites, focusOnObject, isPrime ? "AI1 Prime" : "AI1 Satellite", radius, speed, phase, isPrime, k, j, planeNormal);
+      satellite(scene, R, interactive, satellites, focusOnObject, isPrime ? "Guardian Prime" : "Guardian Relay", radius, speed, phase, isPrime, k, j, planeNormal);
     }
   }
   for (const guide of planeGuides) addPlaneGuideRing(scene, guide.radius, guide.planeNormal);

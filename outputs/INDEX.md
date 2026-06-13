@@ -25,12 +25,12 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 |---|---|
 | hub.js | Starbase Texas — rocket, dome, tower, buildings |
 | gateway.js | Gateway Station interior — corridor, shuttle, Moon hologram, lighting |
-| moon.js | Lunar surface — regolith, GRU Hotel, Earth in sky |
+| moon.js | Lunar surface — regolith, Imbrium Haven, Earth in sky |
 | orbit/index.js | Orbit scene orchestration, camera params |
 | orbit/earth.js | Earth sphere — textures, day/night shader, clouds, atmosphere, Moon texture helper |
-| orbit/constellation.js | AI1 Walker swarm — 150 satellites, orbital planes, laser links |
+| orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, formation sats |
-| orbit/station.js | Station V — double ring, spokes, rotation, docking hub |
+| orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub |
 
 ### shaders/
 | File | Edit when you need to change |

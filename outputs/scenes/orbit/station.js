@@ -246,7 +246,7 @@ export function buildStation(scene, R, interactive, animated, travel) {
   );
   gatewayHit.position.copy(gateway.position);
   gatewayHit.userData.focusable = true;
-  scene.add(addInteractive(interactive, gatewayHit, "Gateway Station", () => travel("gateway"), "Eight-ring orbital transfer landmark — click to enter"));
-  label(scene, "GATEWAY STATION", gateway.position.clone().add(new THREE.Vector3(0, 0.58 * R, 0)), 0.68, "hero");
+  scene.add(addInteractive(interactive, gatewayHit, "Gateway Station", () => travel("gateway"), "The Crossing between Earthlight and lunar night"));
+  label(scene, "GATEWAY // THE CROSSING", gateway.position.clone().add(new THREE.Vector3(0, 0.58 * R, 0)), 0.68, "hero");
   return gateway;
 }

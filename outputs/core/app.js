@@ -193,6 +193,9 @@ document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("
 async function readyLabelFonts() {
   if (!document.fonts) return;
   const loads = [
+    document.fonts.load("64px Bungee Inline"),
+    document.fonts.load("50px Russo One"),
+    document.fonts.load("700 48px Teko"),
     document.fonts.load("900 48px Orbitron"),
     document.fonts.load("700 48px Orbitron"),
     document.fonts.load("48px Audiowide"),

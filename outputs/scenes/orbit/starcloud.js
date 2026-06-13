@@ -172,7 +172,7 @@ function addComputeSpine(root, detailRoot, R, interactive, focusStarcloud) {
       const module = buildComputeModule(R, bodyMat, darkMat, decalMat, trussMat, false);
       module.position.set(x, -0.012 * R, z);
       module.rotation.y = z > 0 ? -0.08 : 0.08;
-      addInteractive(interactive, module, "STARCLOUD ATLAS-CLASS", focusStarcloud, "Atlas-class orbital data center module bay");
+      addInteractive(interactive, module, "Starcloud Atlas", focusStarcloud, "A skyborne memory forge serving the outer settlements");
       root.add(module);
       if (idx % 2 === 0) {
         const greeble = new THREE.Group();
@@ -479,7 +479,7 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
   addComputeSpine(root, detailRoot, R, interactive, focusStarcloud);
   addLaserTerminals(root, animatedBeams, R);
   addDragonCapsule(root, R);
-  addInteractive(interactive, root, "STARCLOUD ATLAS-CLASS", focusStarcloud, "Atlas-class ~50GW orbital data center · service-droid maintained · laser mesh uplinks");
+  addInteractive(interactive, root, "Starcloud Atlas", focusStarcloud, "A ~50GW orbital data haven watched by service droids and laser uplinks");
 
   const radiatorMat = new THREE.MeshStandardMaterial({ color: 0xd8d9d4, metalness: 0.12, roughness: 0.66 });
   for (const z of [-0.13 * R, 0.13 * R]) {
@@ -540,11 +540,11 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
     }
   };
   animated.push(group);
-  addInteractive(interactive, hit, "STARCLOUD ATLAS-CLASS", focusStarcloud, "Atlas-class ~50GW orbital data center · service-droid maintained · laser mesh uplinks");
+  addInteractive(interactive, hit, "Starcloud Atlas", focusStarcloud, "A ~50GW orbital data haven watched by service droids and laser uplinks");
   hit.userData.focusable = true;
-  const title = label(scene, "STARCLOUD ATLAS-CLASS · ~50GW · ORBITAL DATA CENTER", new THREE.Vector3(), 0.54, "hero");
+  const title = label(scene, "STARCLOUD ATLAS // MEMORY ORBITAL", new THREE.Vector3(), 0.54, "hero");
   title.position.set(0, 0.54 * R, 0);
-  const sub = label(scene, "DARK SOLAR WINGS · DRAGON SERVICE CAPSULE · LASER COMM ARRAY", new THREE.Vector3(), 0.4, "telemetry");
+  const sub = label(scene, "DARK SOLAR WINGS · SERVICE CAPSULE · LASER COMM ARRAY", new THREE.Vector3(), 0.4, "telemetry");
   sub.position.set(0, 0.42 * R, 0);
   group.add(title, sub);
   return group;

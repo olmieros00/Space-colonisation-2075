@@ -63,7 +63,7 @@ async function launchToOrbit(scenes, UI, state) {
   const start = performance.now();
   const startY = rocket.position.y;
   addLaunchPlume(rocket, state.animated);
-  UI.hint.textContent = "Launch Complex Colossus ignition. Tracking ascent to Earth orbit.";
+  UI.hint.textContent = "First Light ignition. Hold the coast in memory while Colossus climbs for orbit.";
   await new Promise(resolve => {
     function step(now) {
       const p = Math.min((now - start) / 3500, 1);

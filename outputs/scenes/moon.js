@@ -5,9 +5,9 @@ import { setOrbit } from "../core/camera.js";
 export function buildMoon(scene, camera, camState, interactive, animated, UI, travel, state, assets) {
   makeStars(scene);
   state.mode = "moon";
-  UI.location.textContent = "LUNAR SURFACE // GRU HOTEL";
+  UI.location.textContent = "MARE IMBRIUM // HAVEN OUTPOST";
   UI.returnBtn.style.display = "block";
-  UI.hint.textContent = "Drag to orbit Mare Imbrium. Wheel zooms toward the hotel approach.";
+  UI.hint.textContent = "Circle the Mare Imbrium shelter. Wheel closer until Earth hangs over the roofline.";
   addLights(scene, state);
   state.renderer.setClearColor(0x010207, 1);
   scene.fog = new THREE.FogExp2(0x010207, 0.012);
@@ -49,10 +49,10 @@ export function buildMoon(scene, camera, camState, interactive, animated, UI, tr
   const sign = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.2, 0.18), mat.dark);
   sign.position.set(3.3, 1.3, -5.7);
   scene.add(sign);
-  label(scene, "GRU HOTEL — MARE IMBRIUM • EST. 2032", new THREE.Vector3(3.3, 2.55, -5.55), 0.43, "subsystem");
-  label(scene, "YC  BACKED BY Y COMBINATOR", new THREE.Vector3(0.6, 1.3, -4.5), 0.32, "telemetry");
-  label(scene, "NVIDIA", new THREE.Vector3(5.7, 1.3, -4.5), 0.32, "subsystem");
-  label(scene, "GRU HOTEL", new THREE.Vector3(10, 5.7, -12), 0.74, "hero");
+  label(scene, "IMBRIUM HAVEN · FIRST OPEN LUNAR ADDRESS", new THREE.Vector3(3.3, 2.55, -5.55), 0.43, "subsystem");
+  label(scene, "CREW SLEEP · WATER SHIELD · EARTH WINDOW", new THREE.Vector3(0.6, 1.3, -4.5), 0.32, "telemetry");
+  label(scene, "HABITAT CORE", new THREE.Vector3(5.7, 1.3, -4.5), 0.32, "subsystem");
+  label(scene, "IMBRIUM // HAVEN", new THREE.Vector3(10, 5.7, -12), 0.74, "hero");
 
   const entryGlow = glowRing(1.25, 0.04);
   entryGlow.position.copy(state.hotelEntrance).add(new THREE.Vector3(0, 1.2, 0));

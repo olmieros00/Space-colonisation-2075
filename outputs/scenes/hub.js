@@ -85,7 +85,7 @@ function makeSolarTexture() {
   });
 }
 
-function makeLogoTexture(text = "SPACEX", vertical = false) {
+function makeLogoTexture(text = "FRONTIER", vertical = false) {
   return canvasTexture(vertical ? 256 : 768, vertical ? 768 : 180, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = "rgba(235,238,238,0.96)";
@@ -183,7 +183,7 @@ function buildRocket() {
   const interstage = cyl(radius * 1.03, radius * 1.03, 0.38, 64, black, 0, 12.95, 0);
   g.add(body, upper, cap, interstage);
 
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 4.9), new THREE.MeshBasicMaterial({ map: makeLogoTexture("SPACEX", true), transparent: true }));
+  const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 4.9), new THREE.MeshBasicMaterial({ map: makeLogoTexture("FRONTIER", true), transparent: true }));
   logo.position.set(0, 7.1, radius + 0.012);
   g.add(logo);
 
@@ -221,7 +221,7 @@ function buildPad(scene, interactive, travel) {
   const scorch = new THREE.MeshStandardMaterial({ color: 0x151210, roughness: 0.95 });
   const steel = new THREE.MeshStandardMaterial({ color: 0x606a73, metalness: 0.72, roughness: 0.36 });
   const pad = cyl(9.3, 10.4, 0.72, 8, concrete, -24, 0.36, -2);
-  addInteractive(interactive, pad, "Launch Complex Colossus", () => travel("orbit"), "Ignite the Falcon-heritage Colossus ascent to orbit");
+  addInteractive(interactive, pad, "First Light Launchway", () => travel("orbit"), "Begin the climb from home soil to the Guardian Net");
   scene.add(pad);
 
   const trench = box(5.4, 0.58, 8.9, scorch, -24, 0.72, 2.75);
@@ -309,7 +309,7 @@ function buildTowers(scene) {
     }
     scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: 0x4b545c, transparent: true, opacity: 0.75 })));
   }
-  label(scene, "MECHAZILLA CATCH TOWER", new THREE.Vector3(-17.3, 25.2, -6.2), 0.48, "subsystem");
+  label(scene, "COLOSSUS CATCH TOWER", new THREE.Vector3(-17.3, 25.2, -6.2), 0.48, "subsystem");
 }
 
 function buildFacility(scene, interactive) {
@@ -338,7 +338,7 @@ function buildFacility(scene, interactive) {
     building.add(box(2.2, 0.65, 1.7, dark, i * 5.8, 6.7, -3.5));
   }
   building.position.set(9, 0, -35);
-  scene.add(addInteractive(interactive, shadowAll(building), "SpaceX Starbase Campus", () => openPanel(), "Open Mission Control routing panel"));
+  scene.add(addInteractive(interactive, shadowAll(building), "Frontier Starbase Campus", () => openPanel(), "Open the route map from Texas to the Moon"));
 
   const control = new THREE.Group();
   const base = box(10, 3.2, 7.5, wall, 0, 1.6, 0);
@@ -346,8 +346,8 @@ function buildFacility(scene, interactive) {
   dome.position.y = 3.25;
   control.add(base, dome);
   control.position.set(28, 0, -26);
-  scene.add(addInteractive(interactive, shadowAll(control), "Mission Control", () => openPanel(), "Open hub-and-spoke mission panel"));
-  label(scene, "MISSION CONTROL", new THREE.Vector3(28, 8.4, -29), 0.5, "subsystem");
+  scene.add(addInteractive(interactive, shadowAll(control), "Frontier Mission Control", () => openPanel(), "Choose the next human step"));
+  label(scene, "FRONTIER MISSION CONTROL", new THREE.Vector3(28, 8.4, -29), 0.5, "subsystem");
 }
 
 function buildDisplayBooster(scene) {
@@ -358,7 +358,7 @@ function buildDisplayBooster(scene) {
   scene.add(booster);
   const plinth = box(5.2, 0.35, 5.2, new THREE.MeshStandardMaterial({ color: 0x73766f, roughness: 0.8 }), 29, 0.18, -37);
   scene.add(plinth);
-  label(scene, "DISPLAY BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "subsystem");
+  label(scene, "HERITAGE BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "subsystem");
 }
 
 function buildProps(scene) {
@@ -436,9 +436,9 @@ function buildGround(scene) {
 
 export function buildHub(scene, camera, camState, interactive, animated, UI, travel, state) {
   state.mode = "hub";
-  UI.location.textContent = "STARBASE TEXAS // 2075";
+  UI.location.textContent = "FRONTIER 2075 // STARBASE TEXAS";
   UI.returnBtn.style.display = "none";
-  UI.hint.textContent = "Drag to orbit the Starbase apron. Wheel zooms. Hover the pad or Mission Control. Click the pad to launch.";
+  UI.hint.textContent = "Orbit the First Light apron. Hover the pad or Mission Control. Click the rocket when you are ready to leave Earth.";
   state.renderer.setClearColor(0x9fc6e8, 1);
   state.renderer.toneMappingExposure = 0.48;
   scene.fog = new THREE.FogExp2(0xb7d5ee, 0.00035);
@@ -453,9 +453,9 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
   const rocket = buildRocket();
   rocket.position.set(-24, 0.55, -2);
   state.hubRocket = rocket;
-  scene.add(addInteractive(interactive, rocket, "Colossus Launch Vehicle", () => travel("orbit"), "Click to ignite and ascend into Earth orbit"));
+  scene.add(addInteractive(interactive, rocket, "Colossus Heavy", () => travel("orbit"), "Click to light the engines and climb toward the blue world above"));
 
   buildTowers(scene);
-  label(scene, "LAUNCH COMPLEX COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "hero");
+  label(scene, "FIRST LIGHT // COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "hero");
   setOrbit(new THREE.Vector3(-24, 6.1, -3), 44, 18, 82, 0.15, 0.95);
 }

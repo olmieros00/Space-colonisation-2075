@@ -128,7 +128,7 @@ function addReceptionLounge(scene) {
     scene.add(table);
   }
 
-  label(scene, "GATEWAY STATION · ORBITAL TRANSFER", new THREE.Vector3(0, 3.2, 9.72), 0.46, "subsystem");
+  label(scene, "GATEWAY STATION · THE CROSSING", new THREE.Vector3(0, 3.2, 9.72), 0.46, "subsystem");
 }
 
 function addCurvedCorridor(scene) {
@@ -163,7 +163,7 @@ function addCurvedCorridor(scene) {
       scene.add(console, screen);
     }
   }
-  label(scene, "CENTRIFUGE CORRIDOR", new THREE.Vector3(0, 5.7, -6.2), 0.42, "subsystem");
+  label(scene, "SPINWARD WALKWAY", new THREE.Vector3(0, 5.7, -6.2), 0.42, "subsystem");
 }
 
 function addOctagonalTunnel(scene) {
@@ -208,7 +208,7 @@ function addPaddedSection(scene) {
     scene.add(hatch);
   }
   scene.add(box(5.9, 0.16, 6.2, padMat, 0, 4.0, centerZ));
-  label(scene, "PADDED TRANSFER AIRLOCK", new THREE.Vector3(0, 4.9, centerZ - 1.3), 0.38, "telemetry");
+  label(scene, "SOFT DOCK AIRLOCK", new THREE.Vector3(0, 4.9, centerZ - 1.3), 0.38, "telemetry");
 }
 
 function addMoonHologram(scene, interactive, animated, assets) {
@@ -229,7 +229,7 @@ function addMoonHologram(scene, interactive, animated, assets) {
   moonHolo.material.transparent = true;
   moonHolo.material.opacity = 0.62;
   moonHolo.position.set(4.2, 1.98, 5.4);
-  scene.add(addInteractive(interactive, moonHolo, "Mare Imbrium Lunar Display", null, "Holographic approach table"));
+  scene.add(addInteractive(interactive, moonHolo, "Imbrium Approach Table", null, "A quiet map of the place where the Moon becomes home"));
   const marker = glowRing(0.22, 0.012);
   marker.position.set(4.76, 2.18, 5.82);
   marker.rotation.y = Math.PI / 2.6;
@@ -260,15 +260,15 @@ function addShuttleDock(scene, interactive, travel) {
   shuttle.add(fuselage, nose, wing, tail);
   shuttle.position.set(0, 1.42, -30.3);
   scene.add(shuttle);
-  addInteractive(interactive, fuselage, "Mare Imbrium Transit", () => travel("moon"), "Docked lunar shuttle — click to depart");
-  label(scene, "MARE IMBRIUM TRANSIT", new THREE.Vector3(0, 3.65, -30.3), 0.62, "hero");
+  addInteractive(interactive, fuselage, "Imbrium Transit", () => travel("moon"), "Docked lunar shuttle — click to cross the last dark");
+  label(scene, "IMBRIUM // TRANSIT", new THREE.Vector3(0, 3.65, -30.3), 0.62, "hero");
 }
 
 export function buildGateway(scene, camera, camState, interactive, animated, UI, travel, state, assets) {
   state.mode = "gateway";
-  UI.location.textContent = "GATEWAY STATION // DOCKING BAY";
+  UI.location.textContent = "GATEWAY // THE CROSSING";
   UI.returnBtn.style.display = "block";
-  UI.hint.textContent = "Drag to look through the transfer concourse. Wheel zooms. Hover displays. Click the Mare Imbrium Transit shuttle.";
+  UI.hint.textContent = "Look through the bright transfer concourse. Hover displays. Click Imbrium Transit when the Moon starts calling.";
   state.renderer.setClearColor(0xf2f2ec, 1);
   state.renderer.toneMappingExposure = 0.46;
   scene.fog = new THREE.FogExp2(0xf2f2ec, 0.0025);

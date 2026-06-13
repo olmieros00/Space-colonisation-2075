@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Starbase 2075: GRU Hotel Transit</title>
+  <title>Frontier 2075: Moonbound Transit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@700;900&family=Oxanium:wght@600;800&family=Saira+Condensed:wght@600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Bungee+Inline&family=Orbitron:wght@700;900&family=Oxanium:wght@600;800&family=Russo+One&family=Saira+Condensed:wght@600&family=Share+Tech+Mono&family=Teko:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --beskar: #7a8a9c;
@@ -14,6 +14,7 @@
       --amber: #ff9a3c;
       --hero-gold: #ffd23f;
       --hero-stroke: #5e4500;
+      --hero-core: #090b10;
       --text: #e8e8e0;
       --telemetry: rgba(232, 232, 224, 0.72);
       --panel: rgba(16, 20, 28, 0.78);
@@ -50,13 +51,13 @@
       border: 1px solid rgba(255, 154, 60, 0.42);
       background: linear-gradient(90deg, rgba(26, 29, 36, 0.9), rgba(26, 29, 36, 0.54));
       color: var(--hero-gold);
-      font-family: "Orbitron", "Audiowide", sans-serif;
-      font-size: 13px;
+      font-family: "Bungee Inline", "Orbitron", "Audiowide", sans-serif;
+      font-size: 14px;
       font-weight: 900;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.085em;
       text-transform: uppercase;
-      -webkit-text-stroke: 1px var(--hero-stroke);
-      text-shadow: 0 0 12px rgba(255, 174, 0, 0.72), 0 0 28px rgba(255, 154, 60, 0.28);
+      -webkit-text-stroke: 1.15px var(--hero-gold);
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 174, 0, 0.72), 0 0 34px rgba(255, 154, 60, 0.28);
       backdrop-filter: blur(12px);
       clip-path: polygon(9% 0, 91% 0, 100% 34%, 93% 100%, 7% 100%, 0 34%);
       z-index: 6;
@@ -73,8 +74,8 @@
     }
 
     #returnBtn, .mission-card, #closePanel {
-      font: 800 13px "Oxanium", sans-serif;
-      letter-spacing: 0.06em;
+      font: 700 14px "Russo One", "Oxanium", sans-serif;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--text);
       border: 1px solid rgba(255, 154, 60, 0.55);
@@ -147,7 +148,7 @@
 
     #tooltip strong {
       color: var(--amber);
-      font-family: "Oxanium", sans-serif;
+      font-family: "Russo One", "Oxanium", sans-serif;
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -181,8 +182,8 @@
     #missionPanel h2 {
       margin: 0 0 16px;
       color: var(--amber);
-      font-family: "Oxanium", sans-serif;
-      font-size: 17px;
+      font-family: "Russo One", "Oxanium", sans-serif;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -207,8 +208,8 @@
     .mission-card strong {
       display: block;
       color: var(--text);
-      font-family: "Oxanium", sans-serif;
-      font-size: 13px;
+      font-family: "Russo One", "Oxanium", sans-serif;
+      font-size: 14px;
       font-weight: 800;
       letter-spacing: 0.05em;
       line-height: 1.2;
@@ -239,15 +240,15 @@
       transform: translate(-50%, -50%);
       width: min(680px, calc(100vw - 34px));
       color: var(--hero-gold);
-      font-family: "Audiowide", "Orbitron", sans-serif;
+      font-family: "Bungee Inline", "Orbitron", "Audiowide", sans-serif;
       text-align: center;
       font-size: clamp(18px, 3vw, 34px);
       font-weight: 900;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.085em;
       text-transform: uppercase;
       line-height: 1.24;
-      -webkit-text-stroke: 1px var(--hero-stroke);
-      text-shadow: 0 0 12px rgba(255, 174, 0, 0.78), 0 0 38px rgba(255, 154, 60, 0.32);
+      -webkit-text-stroke: 1.35px var(--hero-gold);
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 174, 0, 0.78), 0 0 42px rgba(255, 154, 60, 0.34);
       opacity: 0;
       z-index: 5;
       pointer-events: none;
@@ -300,17 +301,17 @@
 <body>
   <canvas id="scene"></canvas>
   <div id="hint"></div>
-  <div id="hud"><span class="visor"></span><span id="location">STARBASE TEXAS // 2075</span></div>
-  <button id="returnBtn">RETURN TO STARBASE</button>
+  <div id="hud"><span class="visor"></span><span id="location">FRONTIER 2075 // STARBASE TEXAS</span></div>
+  <button id="returnBtn">RETURN TO FIRST LIGHT</button>
   <button id="earthViewBtn">↺ EARTH VIEW</button>
   <div id="tooltip"></div>
-  <div id="welcome">Welcome to the Moon.<br>Galactic Resource Utilization Space.</div>
+  <div id="welcome">Welcome to Imbrium Haven.<br>Earth is still in the sky.</div>
   <section id="missionPanel" aria-label="Mission Control">
-    <h2>MISSION CONTROL DOME</h2>
+    <h2>FRONTIER MISSION ROUTES</h2>
     <div class="mission-grid">
-      <button class="mission-card" data-dest="orbit"><strong>Launch to Orbit</strong><span>Falcon-heritage Colossus ascent to the AI1 constellation.</span></button>
-      <button class="mission-card" data-dest="gateway"><strong>Lunar Transfer</strong><span>Dock at Gateway Station and stage for Mare Imbrium.</span></button>
-      <button class="mission-card" data-dest="moon"><strong>GRU Hotel — Mare Imbrium</strong><span>Surface arrival at the pit-shielded lunar habitat.</span></button>
+      <button class="mission-card" data-dest="orbit"><strong>The First Climb</strong><span>Ride Colossus from the Texas coast into the Guardian Net.</span></button>
+      <button class="mission-card" data-dest="gateway"><strong>The Crossing</strong><span>Enter Gateway Station, the spinning city between Earth and Moon.</span></button>
+      <button class="mission-card" data-dest="moon"><strong>Imbrium Haven</strong><span>Touch down where lunar night becomes a human address.</span></button>
     </div>
     <button id="closePanel">CLOSE</button>
   </section>

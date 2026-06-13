@@ -9,9 +9,9 @@ import { buildStation } from "./station.js";
 export function buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, travel, state, focusOnObject) {
   makeStars(scene);
   state.mode = "orbit";
-  UI.location.textContent = "EARTH ORBIT // AI1 CONSTELLATION";
+  UI.location.textContent = "EARTH ORBIT // GUARDIAN NET";
   UI.returnBtn.style.display = "block";
-  UI.hint.textContent = "Drag to orbit the camera. Wheel zooms. Hover AI1 Prime or Starcloud. Click focusable orbit assets for fly-to inspection.";
+  UI.hint.textContent = "Orbit the blue homeworld. Hover Guardian Prime or Starcloud Atlas. Click a landmark to move closer.";
   addLights(scene, state);
   scene.fog = null;
   buildEarth(scene, R, animated, state);
