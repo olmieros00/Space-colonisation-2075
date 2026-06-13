@@ -82,10 +82,27 @@
       display: none;
     }
 
-    #returnBtn:hover, .mission-card:hover, #closePanel:hover {
+    #earthViewBtn {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      min-width: 168px;
+      height: 44px;
+      padding: 0 18px;
+      clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+      z-index: 6;
+      display: none;
+    }
+
+    #returnBtn:hover, #earthViewBtn:hover, .mission-card:hover, #closePanel:hover {
       border-color: var(--amber);
       background: rgba(255, 154, 60, 0.16);
       transform: translateY(-1px);
+    }
+
+    #earthViewBtn:hover {
+      transform: translateX(-50%) translateY(-1px);
     }
 
     #tooltip {
@@ -233,6 +250,7 @@
   <div id="hint"></div>
   <div id="hud"><span class="visor"></span><span id="location">STARBASE TEXAS // 2075</span></div>
   <button id="returnBtn">RETURN TO STARBASE</button>
+  <button id="earthViewBtn">↺ EARTH VIEW</button>
   <div id="tooltip"></div>
   <div id="welcome">Welcome to the Moon.<br>Galactic Resource Utilization Space.</div>
   <section id="missionPanel" aria-label="Mission Control">
@@ -272,7 +290,8 @@
       panel: document.getElementById("missionPanel"),
       iris: document.getElementById("iris"),
       welcome: document.getElementById("welcome"),
-      returnBtn: document.getElementById("returnBtn")
+      returnBtn: document.getElementById("returnBtn"),
+      earthViewBtn: document.getElementById("earthViewBtn")
     };
 
     const C = {
@@ -297,6 +316,9 @@
     let orbitMin = 14;
     let orbitMax = 70;
     let orbitTarget = new THREE.Vector3(0, 0, 0);
+    let focusTarget = new THREE.Vector3(0, 0, 0);
+    let focusDistance = 2.6 * R;
+    let focusTween = null;
     let hotelEntrance = new THREE.Vector3(0, 0, 0);
     let hubRocket = null;
     let launching = false;
@@ -397,6 +419,51 @@
       orbitPitch = pitch;
       orbitYaw = yaw;
       updateOrbitCamera();
+    }
+
+    function easeInOut(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function focusOnObject(obj, closeDistance) {
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3()).length() || R * 0.1;
+      const center = box.getCenter(new THREE.Vector3());
+      focusTarget.copy(center);
+      focusDistance = closeDistance || THREE.MathUtils.clamp(size * 3, 0.18 * R, 1.8 * R);
+      focusTween = {
+        start: performance.now(),
+        fromTarget: orbitTarget.clone(),
+        toTarget: center,
+        fromDistance: orbitDistance,
+        toDistance: focusDistance
+      };
+      UI.earthViewBtn.style.display = "block";
+    }
+
+    function focusEarth() {
+      focusTarget.set(0, 0, 0);
+      focusDistance = 2.6 * R;
+      focusTween = {
+        start: performance.now(),
+        fromTarget: orbitTarget.clone(),
+        toTarget: focusTarget.clone(),
+        fromDistance: orbitDistance,
+        toDistance: focusDistance,
+        hideButton: true
+      };
+    }
+
+    function updateFocusTween() {
+      if (!focusTween) return;
+      const p = Math.min((performance.now() - focusTween.start) / 1000, 1);
+      const e = easeInOut(p);
+      orbitTarget.lerpVectors(focusTween.fromTarget, focusTween.toTarget, e);
+      orbitDistance = THREE.MathUtils.lerp(focusTween.fromDistance, focusTween.toDistance, e);
+      if (p >= 1) {
+        if (focusTween.hideButton) UI.earthViewBtn.style.display = "none";
+        focusTween = null;
+      }
     }
 
     function normalizedMouse(event) {
@@ -500,6 +567,10 @@
       animated.length = 0;
       hovered = null;
       hubRocket = null;
+      focusTween = null;
+      focusTarget.set(0, 0, 0);
+      focusDistance = 2.6 * R;
+      if (UI.earthViewBtn) UI.earthViewBtn.style.display = "none";
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x05070b, 0.016);
       renderer.setClearColor(0x05070b, 1);
@@ -651,9 +722,9 @@
       setOrbit(new THREE.Vector3(0, 4, 0), 64, 30, 110, 0.62, 0.55);
     }
 
-    function satellite(name, radius, speed, phase, prime = false) {
+    function satellite(name, radius, speed, phase, prime = false, plane = 0, index = 0) {
       const g = new THREE.Group();
-      const span = (prime ? 0.06 : 0.035) * R;
+      const span = (prime ? 0.08 : 0.045) * R;
       const bodySize = prime ? 0.010 * R : 0.007 * R;
       const gold = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.9, roughness: 0.3 });
       const solar = new THREE.MeshStandardMaterial({ color: 0x16294a, emissive: 0x2f5694, emissiveIntensity: 0.4, metalness: 0.28, roughness: 0.42 });
@@ -717,10 +788,15 @@
         speed,
         phase,
         prime,
-        inclination: prime ? 0.28 : THREE.MathUtils.randFloat(-0.6, 0.6),
-        ascendingNode: prime ? 1.2 : Math.random() * Math.PI * 2
+        plane,
+        index,
+        inclination: 0.925,
+        ascendingNode: plane * (Math.PI * 2 / 10)
       };
-      if (prime) addInteractive(body, name, null, "AI Data Center Node — 150kW peak");
+      if (prime) {
+        g.userData.focusable = true;
+        addInteractive(body, name, () => focusOnObject(g), "AI Data Center Node — 150kW peak");
+      }
       satellites.push(g);
       scene.add(g);
       return g;
@@ -792,39 +868,150 @@
       return station;
     }
 
+    function makeGridTexture(size = 512, cells = 12, base = "#203142", line = "#77a8c9") {
+      const cnv = document.createElement("canvas");
+      cnv.width = size;
+      cnv.height = size;
+      const ctx = cnv.getContext("2d");
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = line;
+      ctx.globalAlpha = 0.58;
+      ctx.lineWidth = 2;
+      for (let i = 0; i <= cells; i++) {
+        const p = (i / cells) * size;
+        ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
+      }
+      return new THREE.CanvasTexture(cnv);
+    }
+
+    function buildStarcloud() {
+      const group = new THREE.Group();
+      const root = new THREE.Group();
+      const focusStarcloud = () => focusOnObject(group, 1.5 * R);
+      const silver = new THREE.MeshStandardMaterial({ color: 0x9aa5ad, metalness: 0.75, roughness: 0.34 });
+      const darkFace = new THREE.MeshStandardMaterial({ color: 0x11151b, metalness: 0.4, roughness: 0.55 });
+      const gold = new THREE.MeshStandardMaterial({ color: 0xc49a35, metalness: 0.8, roughness: 0.36 });
+      const gridTex = makeGridTexture();
+      const arrayMat = new THREE.MeshStandardMaterial({ map: gridTex, color: 0xa9c5d8, emissive: 0x203a52, emissiveIntensity: 0.35, metalness: 0.3, roughness: 0.42 });
+      const radiatorMat = new THREE.MeshStandardMaterial({ color: 0xe6e7e1, metalness: 0.1, roughness: 0.62 });
+
+      const primary = new THREE.Group();
+      const solar = new THREE.Mesh(new THREE.BoxGeometry(0.43 * R, 0.01 * R, 0.43 * R), arrayMat);
+      solar.rotation.z = 0.18;
+      solar.rotation.y = -0.4;
+      solar.position.set(0, 0.08 * R, 0);
+      addInteractive(solar, "STARCLOUD // ORBITAL DATA CENTER", focusStarcloud, "First H100 in orbit (2025) · Sun-synchronous · Radiative cooling");
+      const radiator = new THREE.Mesh(new THREE.BoxGeometry(0.012 * R, 0.32 * R, 0.32 * R), radiatorMat);
+      radiator.position.set(0.28 * R, 0, 0);
+      addInteractive(radiator, "STARCLOUD // ORBITAL DATA CENTER", focusStarcloud, "First H100 in orbit (2025) · Sun-synchronous · Radiative cooling");
+      primary.add(solar, radiator);
+      for (let i = 0; i < 7; i++) {
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.055 * R, 0.035 * R, 0.045 * R), silver);
+        box.position.set((i - 3) * 0.064 * R, -0.06 * R, 0);
+        const inset = new THREE.Mesh(new THREE.BoxGeometry(0.036 * R, 0.003 * R, 0.024 * R), darkFace);
+        inset.position.set(box.position.x, box.position.y + 0.019 * R, box.position.z + 0.006 * R);
+        addInteractive(box, "STARCLOUD // ORBITAL DATA CENTER", focusStarcloud, "First H100 in orbit (2025) · Sun-synchronous · Radiative cooling");
+        primary.add(box, inset);
+      }
+      for (let i = -2; i <= 2; i++) {
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(0.004 * R, 0.34 * R, 0.006 * R), darkFace);
+        rib.position.set(0.287 * R, i * 0.06 * R, 0.17 * R);
+        primary.add(rib);
+      }
+      root.add(primary);
+
+      function smallComputeSat(i) {
+        const sat = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.038 * R, 0.026 * R, 0.03 * R), i % 2 ? silver : gold);
+        const finA = new THREE.Mesh(new THREE.BoxGeometry(0.042 * R, 0.006 * R, 0.018 * R), arrayMat);
+        const finB = finA.clone();
+        finA.position.x = 0.043 * R;
+        finB.position.x = -0.043 * R;
+        sat.add(body, finA, finB);
+        const a = i * Math.PI * 2 / 6;
+        sat.position.set(Math.cos(a) * 0.42 * R, (i - 2.5) * 0.035 * R, Math.sin(a) * 0.32 * R);
+        sat.rotation.y = a;
+        root.add(sat);
+      }
+      for (let i = 0; i < 6; i++) smallComputeSat(i);
+
+      const capsule = new THREE.Group();
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.03 * R, 0.055 * R, 32), mat.white);
+      cone.rotation.x = Math.PI;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.026 * R, 0.026 * R, 0.045 * R, 32), mat.beskar);
+      trunk.position.y = -0.045 * R;
+      capsule.add(cone, trunk);
+      capsule.position.set(-0.42 * R, 0.12 * R, 0.28 * R);
+      capsule.rotation.z = -0.6;
+      root.add(capsule);
+
+      const hit = new THREE.Mesh(new THREE.SphereGeometry(0.5 * R, 32, 16), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      group.add(root);
+      group.add(hit);
+      group.position.set(-1.4 * R, -0.15 * R, 1.3 * R);
+      group.userData = { radius: group.position.length(), phase: Math.atan2(group.position.z, group.position.x), speed: 0.032, inclination: 1.69, ascendingNode: -0.3 };
+      group.userData.tick = (t) => {
+        const d = group.userData;
+        const a = d.phase + t * d.speed;
+        const p = new THREE.Vector3(Math.cos(a) * d.radius, 0, Math.sin(a) * d.radius);
+        p.applyAxisAngle(new THREE.Vector3(1, 0, 0), d.inclination);
+        p.applyAxisAngle(new THREE.Vector3(0, 1, 0), d.ascendingNode);
+        group.position.copy(p);
+        root.rotation.y = t * 0.18;
+        root.rotation.z = Math.sin(t * 0.35) * 0.08;
+      };
+      animated.push(group);
+      addInteractive(hit, "STARCLOUD // ORBITAL DATA CENTER", focusStarcloud, "First H100 in orbit (2025) · Sun-synchronous · Radiative cooling");
+      hit.userData.focusable = true;
+      const title = label("STARCLOUD // ORBITAL DATA CENTER", new THREE.Vector3(), 0.62);
+      title.position.set(0, 0.62 * R, 0);
+      const sub = label("40MW CLUSTER · NVIDIA GB200 · SCALING TO 5GW", new THREE.Vector3(), 0.45, "#ff9a3c");
+      sub.position.set(0, 0.48 * R, 0);
+      group.add(title, sub);
+      return group;
+    }
+
     function buildOrbit() {
       resetScene();
       makeStars(scene);
       mode = "orbit";
       UI.location.textContent = "EARTH ORBIT // AI1 CONSTELLATION";
       UI.returnBtn.style.display = "block";
-      UI.hint.textContent = "Drag to orbit the camera. Wheel zooms. Hover AI1 Prime. Click Gateway Station to enter the docking bay.";
+      UI.hint.textContent = "Drag to orbit the camera. Wheel zooms. Hover AI1 Prime or Starcloud. Click focusable orbit assets for fly-to inspection.";
       addLights(scene);
       scene.fog = null;
       const earth = earthMesh(R);
+      earth.scale.y = 0.99665;
       scene.add(earth);
       const moon = moonMesh(0.27 * R);
-      moon.position.set(-4 * R, 0.5 * R, -4.5 * R);
+      moon.position.set(-4.5 * R, 0.4 * R, -4 * R);
       scene.add(moon);
       const moonLight = new THREE.PointLight(0xd0d8e8, 0.4, 120);
       moonLight.position.copy(moon.position);
       scene.add(moonLight);
 
-      for (let i = 0; i < 150; i++) {
-        const shell = i % 6;
-        const ring = THREE.MathUtils.lerp(1.08 * R, 1.35 * R, shell / 5) + Math.random() * 0.012 * R;
-        satellite("AI1 Satellite", ring, 0.05 + Math.random() * 0.05, Math.random() * Math.PI * 2);
+      const shells = [1.06 * R, 1.10 * R, 1.14 * R];
+      for (let k = 0; k < 10; k++) {
+        const radius = shells[k % shells.length];
+        const speed = 0.09 * Math.pow(1.06 * R / radius, 1.5);
+        for (let j = 0; j < 15; j++) {
+          const phase = j * (Math.PI * 2 / 15) + k * 0.07;
+          const isPrime = k === 0 && j === 0;
+          satellite(isPrime ? "AI1 Prime" : "AI1 Satellite", radius, speed, phase, isPrime, k, j);
+        }
       }
-      satellite("AI1 Prime", 1.22 * R, 0.042, 0.8, true);
 
       const lineGeo = new THREE.BufferGeometry();
       const linePos = [];
-      for (let i = 0; i < 40; i++) linePos.push(0, 0, 0, 0, 0, 0);
+      const linkCount = 36;
+      for (let i = 0; i < linkCount; i++) linePos.push(0, 0, 0, 0, 0, 0);
       lineGeo.setAttribute("position", new THREE.Float32BufferAttribute(linePos, 3));
       const links = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ color: C.amber, transparent: true, opacity: 0.12 }));
       links.userData.tick = (t) => {
         const p = links.geometry.attributes.position;
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < linkCount; i++) {
           const a = satellites[(i * 3) % satellites.length].position;
           const b = satellites[(i * 3 + 11) % satellites.length].position;
           p.setXYZ(i * 2, a.x, a.y, a.z);
@@ -837,7 +1024,7 @@
       scene.add(links);
 
       const gateway = buildGatewayStation();
-      gateway.position.set(1.9 * R, 0.35 * R, -0.8 * R);
+      gateway.position.set(1.7 * R, 0.35 * R, -0.7 * R);
       gateway.rotation.y = -0.35;
       scene.add(gateway);
       const gatewayHit = new THREE.Mesh(
@@ -848,7 +1035,10 @@
       scene.add(addInteractive(gatewayHit, "Gateway Station", () => travel("gateway"), "Click to enter docking bay interior"));
       label("GATEWAY STATION", gateway.position.clone().add(new THREE.Vector3(0, 0.45 * R, 0)), 0.68);
 
-      setOrbit(new THREE.Vector3(0, 0, 0), 2.6 * R, 1.3 * R, 6 * R, 0.18, 0.3);
+      const starcloud = buildStarcloud();
+      scene.add(starcloud);
+
+      setOrbit(new THREE.Vector3(0, 0, 0), 2.6 * R, 1.02 * R, 6 * R, 0.18, 0.3);
     }
 
     function buildGateway() {
@@ -1093,7 +1283,6 @@
         s.position.copy(pos);
         s.lookAt(0, 0, 0);
       }
-      updateOrbitCamera();
     }
 
     function pick() {
@@ -1124,9 +1313,10 @@
       const t = clock.elapsedTime;
       requestAnimationFrame(animate);
       if (mode === "orbit") updateOrbit(dt, t);
-      if (mode !== "orbit") updateOrbitCamera();
-      if (mode === "moon") UI.welcome.classList.toggle("show", orbitDistance < 15);
       for (const a of animated) if (a.userData.tick) a.userData.tick(t, dt);
+      updateFocusTween();
+      updateOrbitCamera();
+      if (mode === "moon") UI.welcome.classList.toggle("show", orbitDistance < 15);
       pick();
       renderer.render(scene, camera);
     }
@@ -1157,6 +1347,7 @@
     renderer.domElement.addEventListener("pointerup", e => {
       dragging = false;
       normalizedMouse(e);
+      pick();
       if (!dragMoved && hovered && hovered.userData.interactive.action) {
         hovered.userData.interactive.action();
       }
@@ -1165,6 +1356,7 @@
       orbitDistance = THREE.MathUtils.clamp(orbitDistance + e.deltaY * 0.025, orbitMin, orbitMax);
     }, { passive: true });
     UI.returnBtn.addEventListener("click", () => travel("hub"));
+    UI.earthViewBtn.addEventListener("click", focusEarth);
     document.getElementById("closePanel").addEventListener("click", closePanel);
     document.querySelectorAll(".mission-card").forEach(btn => btn.addEventListener("click", () => travel(btn.dataset.dest)));
 
