@@ -24,16 +24,21 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | app.js | Animation loop, renderer setup, shared state, scene switching |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
 | cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
-| materials.js | Shared colour palette, material definitions, labels, stars, texture loading |
+| constants.js | Shared scale constants, currently `R = 16` |
+| labels.js | Canvas sprite label system and label-tier typography |
+| materials.js | Shared colour palette, material definitions, stars, texture loading |
+| primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |
 | transitions.js | Iris wipe animation, Starbase launch animation, travel() scene dispatcher |
 | ui.js | DOM element refs, mission panel open/close |
 
 ### scenes/
 | File | Edit when you need to change |
 |---|---|
-| hub.js | Starbase Texas — rocket, dome, tower, buildings |
 | gateway.js | Gateway Station interior — corridor, shuttle, Moon hologram, lighting |
 | moon.js | Lunar surface — regolith, Imbrium Haven, Earth in sky |
+| hub/index.js | Starbase Texas scene entry point and daylight setup |
+| hub/structures.js | Starbase rocket, pad, towers, campus, props, ground |
+| hub/textures.js | Starbase procedural canvas textures |
 | orbit/index.js | Orbit scene orchestration, camera params |
 | orbit/earth.js | Earth sphere — textures, day/night shader, clouds, atmosphere, Moon texture helper |
 | orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |

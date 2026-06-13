@@ -1,23 +1,10 @@
 import * as THREE from "three";
-import { addInteractive, glowRing, label, mat } from "../core/materials.js";
+import { addInteractive, glowRing, mat } from "../core/materials.js";
+import { label } from "../core/labels.js";
+import { box, cyl } from "../core/primitives.js";
 import { setOrbit } from "../core/camera.js";
 
 const TWO_PI = Math.PI * 2;
-
-function box(w, h, d, material, x = 0, y = h / 2, z = 0) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
-function cyl(r1, r2, h, material, segments = 32) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, segments), material);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
 
 function makeLineTexture() {
   const cnv = document.createElement("canvas");
@@ -108,7 +95,7 @@ function addReceptionLounge(scene) {
 
   for (let i = 0; i < 5; i++) {
     const chair = new THREE.Group();
-    const seat = cyl(0.46, 0.52, 0.45, red, 28);
+    const seat = cyl(0.46, 0.52, 0.45, red, 28, 0, 0, 0);
     seat.scale.z = 0.7;
     const back = box(0.92, 0.74, 0.12, red, 0, 0.74, -0.36);
     back.rotation.x = -0.28;
@@ -120,8 +107,8 @@ function addReceptionLounge(scene) {
 
   for (const [x, z] of [[-1.6, 2.9], [3.8, 3.3], [-4.6, 5.1]]) {
     const table = new THREE.Group();
-    table.add(cyl(0.08, 0.08, 0.58, white, 20));
-    const top = cyl(0.62, 0.62, 0.08, white, 36);
+    table.add(cyl(0.08, 0.08, 0.58, white, 20, 0, 0, 0));
+    const top = cyl(0.62, 0.62, 0.08, white, 36, 0, 0, 0);
     top.position.y = 0.62;
     table.add(top);
     table.position.set(x, 0.02, z);
@@ -215,8 +202,8 @@ function addMoonHologram(scene, interactive, animated, assets) {
   const table = new THREE.Group();
   const white = new THREE.MeshPhysicalMaterial({ color: 0xf1f1eb, metalness: 0.04, roughness: 0.25, clearcoat: 0.4 });
   const glass = new THREE.MeshBasicMaterial({ color: 0x6fd8ff, transparent: true, opacity: 0.18 });
-  table.add(cyl(0.18, 0.18, 1.0, white, 24));
-  const top = cyl(1.55, 1.55, 0.10, white, 48);
+  table.add(cyl(0.18, 0.18, 1.0, white, 24, 0, 0, 0));
+  const top = cyl(1.55, 1.55, 0.10, white, 48, 0, 0, 0);
   top.position.y = 1.0;
   table.add(top);
   const dish = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.02, 48), glass);
@@ -250,7 +237,7 @@ function addShuttleDock(scene, interactive, travel) {
   scene.add(bay);
 
   const shuttle = new THREE.Group();
-  const fuselage = cyl(0.62, 0.78, 5.4, white, 36);
+  const fuselage = cyl(0.62, 0.78, 5.4, white, 36, 0, 0, 0);
   fuselage.rotation.x = Math.PI / 2;
   const nose = new THREE.Mesh(new THREE.ConeGeometry(0.70, 1.1, 36), white);
   nose.rotation.x = Math.PI / 2;

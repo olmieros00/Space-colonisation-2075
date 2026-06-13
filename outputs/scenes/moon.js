@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { addLights, glowRing, label, makeParticles, makeStars, mat } from "../core/materials.js";
+import { addLights, glowRing, makeParticles, makeStars, mat } from "../core/materials.js";
+import { label } from "../core/labels.js";
 import { setOrbit } from "../core/camera.js";
 
 export function buildMoon(scene, camera, camState, interactive, animated, UI, travel, state, assets) {

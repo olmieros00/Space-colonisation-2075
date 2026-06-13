@@ -1,186 +1,21 @@
 import * as THREE from "three";
-import { Sky } from "three/addons/objects/Sky.js";
-import { addInteractive, label, mat } from "../core/materials.js";
-import { openPanel } from "../core/ui.js";
-import { setOrbit } from "../core/camera.js";
+import { addInteractive } from "../../core/materials.js";
+import { label } from "../../core/labels.js";
+import { box, cyl, shadowAll } from "../../core/primitives.js";
+import { openPanel } from "../../core/ui.js";
+import { makeConcreteTexture, makeLogoTexture, makeSolarTexture } from "./textures.js";
 
-const DEG = Math.PI / 180;
-
-function canvasTexture(width, height, draw) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  draw(ctx, width, height);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  return tex;
-}
-
-function makeConcreteTexture() {
-  const tex = canvasTexture(1024, 1024, (ctx, w, h) => {
-    ctx.fillStyle = "#777b74";
-    ctx.fillRect(0, 0, w, h);
-    for (let i = 0; i < 36000; i++) {
-      const v = 96 + Math.random() * 48;
-      ctx.fillStyle = `rgba(${v},${v + 2},${v - 6},${Math.random() * 0.06})`;
-      ctx.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 3, 1 + Math.random() * 3);
-    }
-    ctx.strokeStyle = "rgba(65,70,68,0.45)";
-    ctx.lineWidth = 3;
-    for (let x = 0; x <= w; x += 128) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= h; y += 128) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
-    }
-    for (let i = 0; i < 42; i++) {
-      const x = w * (0.35 + Math.random() * 0.28);
-      const y = h * (0.4 + Math.random() * 0.22);
-      const r = 18 + Math.random() * 86;
-      const g = ctx.createRadialGradient(x, y, r * 0.08, x, y, r);
-      g.addColorStop(0, "rgba(20,18,16,0.18)");
-      g.addColorStop(1, "rgba(20,18,16,0)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.ellipse(x, y, r * 1.8, r * 0.55, Math.random() * Math.PI, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  });
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(8, 6);
-  return tex;
-}
-
-function makeSolarTexture() {
-  return canvasTexture(512, 256, (ctx, w, h) => {
-    const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, "#081326");
-    grad.addColorStop(0.55, "#12264a");
-    grad.addColorStop(1, "#050b16");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(90,130,190,0.45)";
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= w; x += 24) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, h);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= h; y += 24) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
-    }
-  });
-}
-
-function makeLogoTexture(text = "FRONTIER", vertical = false) {
-  return canvasTexture(vertical ? 256 : 768, vertical ? 768 : 180, (ctx, w, h) => {
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "rgba(235,238,238,0.96)";
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = "#252a30";
-    ctx.font = `900 ${vertical ? 58 : 96}px Arial Black, Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    if (vertical) {
-      ctx.translate(w * 0.5, h * 0.5);
-      ctx.rotate(-Math.PI / 2);
-      ctx.fillText(text, 0, 0);
-    } else {
-      ctx.fillText(text, w * 0.5, h * 0.54);
-      ctx.strokeStyle = "rgba(60,68,76,0.38)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(w * 0.15, h * 0.72);
-      ctx.quadraticCurveTo(w * 0.58, h * 0.18, w * 0.89, h * 0.32);
-      ctx.stroke();
-    }
-  });
-}
-
-function shadowAll(obj, cast = true, receive = false) {
-  obj.traverse(o => {
-    if (o.isMesh) {
-      o.castShadow = cast;
-      o.receiveShadow = receive;
-    }
-  });
-  return obj;
-}
-
-function box(w, h, d, material, x = 0, y = h / 2, z = 0) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
-function cyl(r1, r2, h, seg, material, x = 0, y = h / 2, z = 0) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, seg), material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
-function configureDaylight(scene, state) {
-  const sky = new Sky();
-  sky.scale.setScalar(450000);
-  const sun = new THREE.Vector3();
-  const phi = THREE.MathUtils.degToRad(90 - 25);
-  const theta = THREE.MathUtils.degToRad(32);
-  sun.setFromSphericalCoords(1, phi, theta);
-  sky.material.uniforms.turbidity.value = 2.4;
-  sky.material.uniforms.rayleigh.value = 2.8;
-  sky.material.uniforms.mieCoefficient.value = 0.0015;
-  sky.material.uniforms.mieDirectionalG.value = 0.62;
-  sky.material.uniforms.sunPosition.value.copy(sun);
-  scene.add(sky);
-
-  const pmrem = new THREE.PMREMGenerator(state.renderer);
-  scene.environment = pmrem.fromScene(sky).texture;
-  pmrem.dispose();
-
-  const sunLight = new THREE.DirectionalLight(0xfff1d4, 1.65);
-  sunLight.position.copy(sun).multiplyScalar(120);
-  sunLight.castShadow = true;
-  sunLight.shadow.mapSize.set(2048, 2048);
-  sunLight.shadow.camera.left = -82;
-  sunLight.shadow.camera.right = 82;
-  sunLight.shadow.camera.top = 70;
-  sunLight.shadow.camera.bottom = -70;
-  sunLight.shadow.camera.near = 1;
-  sunLight.shadow.camera.far = 250;
-  sunLight.shadow.bias = -0.00015;
-  scene.add(sunLight);
-  scene.add(new THREE.HemisphereLight(0x8fc7ff, 0xc6ad7e, 0.52));
-  state.activeSun = sunLight;
-}
-
-function buildRocket() {
+export function buildRocket() {
   const g = new THREE.Group();
   const white = new THREE.MeshPhysicalMaterial({ color: 0xe2e3dd, metalness: 0.18, roughness: 0.36, clearcoat: 0.35 });
   const black = new THREE.MeshStandardMaterial({ color: 0x111217, metalness: 0.4, roughness: 0.42 });
   const metal = new THREE.MeshStandardMaterial({ color: 0x59616b, metalness: 0.72, roughness: 0.34 });
   const radius = 0.52;
-  const body = cyl(radius, radius, 12.6, 64, white, 0, 6.85, 0);
-  const upper = cyl(radius * 1.02, radius * 1.02, 1.2, 64, white, 0, 13.75, 0);
+  const body = cyl(radius, radius, 12.6, white, 64, 0, 6.85, 0);
+  const upper = cyl(radius * 1.02, radius * 1.02, 1.2, white, 64, 0, 13.75, 0);
   const cap = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.02, 64, 24, 0, Math.PI * 2, 0, Math.PI / 2), white);
   cap.position.y = 14.35;
-  const interstage = cyl(radius * 1.03, radius * 1.03, 0.38, 64, black, 0, 12.95, 0);
+  const interstage = cyl(radius * 1.03, radius * 1.03, 0.38, black, 64, 0, 12.95, 0);
   g.add(body, upper, cap, interstage);
 
   const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 4.9), new THREE.MeshBasicMaterial({ map: makeLogoTexture("FRONTIER", true), transparent: true }));
@@ -203,11 +38,11 @@ function buildRocket() {
     g.add(leg);
   }
   const octaweb = new THREE.Group();
-  octaweb.add(cyl(radius * 1.08, radius * 1.08, 0.22, 64, black, 0, 0.2, 0));
+  octaweb.add(cyl(radius * 1.08, radius * 1.08, 0.22, black, 64, 0, 0.2, 0));
   for (let i = 0; i < 9; i++) {
     const a = i === 0 ? 0 : (i - 1) * Math.PI / 4;
     const r = i === 0 ? 0 : 0.33;
-    const nozzle = cyl(0.075, 0.12, 0.34, 18, metal, Math.cos(a) * r, -0.04, Math.sin(a) * r);
+    const nozzle = cyl(0.075, 0.12, 0.34, metal, 18, Math.cos(a) * r, -0.04, Math.sin(a) * r);
     octaweb.add(nozzle);
   }
   g.add(octaweb);
@@ -216,11 +51,11 @@ function buildRocket() {
   return g;
 }
 
-function buildPad(scene, interactive, travel) {
+export function buildPad(scene, interactive, travel) {
   const concrete = new THREE.MeshStandardMaterial({ color: 0x777a74, roughness: 0.82, metalness: 0.03 });
   const scorch = new THREE.MeshStandardMaterial({ color: 0x151210, roughness: 0.95 });
   const steel = new THREE.MeshStandardMaterial({ color: 0x606a73, metalness: 0.72, roughness: 0.36 });
-  const pad = cyl(9.3, 10.4, 0.72, 8, concrete, -24, 0.36, -2);
+  const pad = cyl(9.3, 10.4, 0.72, concrete, 8, -24, 0.36, -2);
   addInteractive(interactive, pad, "First Light Launchway", () => travel("orbit"), "Begin the climb from home soil to the Guardian Net");
   scene.add(pad);
 
@@ -240,7 +75,7 @@ function buildPad(scene, interactive, travel) {
   return pad;
 }
 
-function addLatticeTower(group, height, width, material, tiers = 12) {
+export function addLatticeTower(group, height, width, material, tiers = 12) {
   const legGeo = new THREE.BoxGeometry(0.18, height, 0.18);
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
@@ -268,7 +103,7 @@ function addLatticeTower(group, height, width, material, tiers = 12) {
   }
 }
 
-function buildTowers(scene) {
+export function buildTowers(scene) {
   const steel = new THREE.MeshStandardMaterial({ color: 0x6d7882, metalness: 0.74, roughness: 0.34 });
   const mech = new THREE.Group();
   addLatticeTower(mech, 23, 2.6, steel, 11);
@@ -312,7 +147,7 @@ function buildTowers(scene) {
   label(scene, "COLOSSUS CATCH TOWER", new THREE.Vector3(-17.3, 25.2, -6.2), 0.48, "subsystem");
 }
 
-function buildFacility(scene, interactive) {
+export function buildFacility(scene, interactive) {
   const wall = new THREE.MeshPhysicalMaterial({ color: 0xdeddd4, metalness: 0.08, roughness: 0.44, clearcoat: 0.18 });
   const glass = new THREE.MeshPhysicalMaterial({ color: 0x1e3548, metalness: 0.05, roughness: 0.08, transmission: 0.18, transparent: true, opacity: 0.72 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x202830, metalness: 0.35, roughness: 0.45 });
@@ -350,7 +185,7 @@ function buildFacility(scene, interactive) {
   label(scene, "FRONTIER MISSION CONTROL", new THREE.Vector3(28, 8.4, -29), 0.5, "subsystem");
 }
 
-function buildDisplayBooster(scene) {
+export function buildDisplayBooster(scene) {
   const booster = buildRocket();
   booster.scale.setScalar(0.62);
   booster.position.set(29, 0.18, -37);
@@ -361,13 +196,13 @@ function buildDisplayBooster(scene) {
   label(scene, "HERITAGE BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "subsystem");
 }
 
-function buildProps(scene) {
+export function buildProps(scene) {
   const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.22, roughness: 0.42 });
   const steel = new THREE.MeshStandardMaterial({ color: 0x7a858d, metalness: 0.72, roughness: 0.35 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x1a1d24, metalness: 0.35, roughness: 0.5 });
   for (let i = 0; i < 7; i++) {
     const tank = i % 2
-      ? cyl(1.25, 1.25, 5.5, 32, white, 38 + i * 2.8, 2.75, -11)
+      ? cyl(1.25, 1.25, 5.5, white, 32, 38 + i * 2.8, 2.75, -11)
       : new THREE.Mesh(new THREE.SphereGeometry(1.7, 32, 16), white);
     if (i % 2 === 0) tank.position.set(38 + i * 2.8, 1.7, -11);
     scene.add(tank);
@@ -379,7 +214,7 @@ function buildProps(scene) {
     truck.add(box(0.75, 0.65, 0.95, white, 0.95, 0.85, 0));
     for (const x of [-0.72, 0.72]) {
       for (const z of [-0.46, 0.46]) {
-        const wheel = cyl(0.18, 0.18, 0.16, 12, dark, x, 0.2, z);
+        const wheel = cyl(0.18, 0.18, 0.16, dark, 12, x, 0.2, z);
         wheel.rotation.x = Math.PI / 2;
         truck.add(wheel);
       }
@@ -390,7 +225,7 @@ function buildProps(scene) {
   }
   for (let i = 0; i < 32; i++) {
     const shrub = new THREE.Group();
-    const trunk = cyl(0.07, 0.11, 0.8 + Math.random() * 0.8, 6, dark);
+    const trunk = cyl(0.07, 0.11, 0.8 + Math.random() * 0.8, dark, 6);
     const leaves = new THREE.Mesh(new THREE.ConeGeometry(0.55 + Math.random() * 0.5, 1.0 + Math.random() * 1.1, 7), new THREE.MeshStandardMaterial({ color: 0x48643a, roughness: 0.9 }));
     leaves.position.y = trunk.geometry.parameters.height + 0.45;
     shrub.add(trunk, leaves);
@@ -398,7 +233,7 @@ function buildProps(scene) {
     scene.add(shrub);
   }
   const dish = new THREE.Group();
-  dish.add(cyl(0.08, 0.1, 2.2, 10, steel, 0, 1.1, 0));
+  dish.add(cyl(0.08, 0.1, 2.2, steel, 10, 0, 1.1, 0));
   const bowl = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2), white);
   bowl.rotation.x = 0.75;
   bowl.position.y = 2.2;
@@ -407,7 +242,7 @@ function buildProps(scene) {
   scene.add(shadowAll(dish));
 }
 
-function buildGround(scene) {
+export function buildGround(scene) {
   const concrete = new THREE.MeshStandardMaterial({ map: makeConcreteTexture(), color: 0xd0cec3, roughness: 0.92, metalness: 0.02 });
   const apron = new THREE.Mesh(new THREE.PlaneGeometry(150, 112), concrete);
   apron.rotation.x = -Math.PI / 2;
@@ -432,30 +267,4 @@ function buildGround(scene) {
   }
   scene.add(box(146, 0.04, 0.06, fenceMat, 0, 1.32, -42));
   scene.add(box(146, 0.04, 0.06, fenceMat, 0, 0.75, -42));
-}
-
-export function buildHub(scene, camera, camState, interactive, animated, UI, travel, state) {
-  state.mode = "hub";
-  UI.location.textContent = "FRONTIER 2075 // STARBASE TEXAS";
-  UI.returnBtn.style.display = "none";
-  UI.hint.textContent = "Orbit the First Light apron. Hover the pad or Mission Control. Click the rocket when you are ready to leave Earth.";
-  state.renderer.setClearColor(0x9fc6e8, 1);
-  state.renderer.toneMappingExposure = 0.48;
-  scene.fog = new THREE.FogExp2(0xb7d5ee, 0.00035);
-  configureDaylight(scene, state);
-  buildGround(scene);
-
-  buildFacility(scene, interactive);
-  buildProps(scene);
-  buildDisplayBooster(scene);
-  buildPad(scene, interactive, travel);
-
-  const rocket = buildRocket();
-  rocket.position.set(-24, 0.55, -2);
-  state.hubRocket = rocket;
-  scene.add(addInteractive(interactive, rocket, "Colossus Heavy", () => travel("orbit"), "Click to light the engines and climb toward the blue world above"));
-
-  buildTowers(scene);
-  label(scene, "FIRST LIGHT // COLOSSUS", new THREE.Vector3(-24, 17.4, -7.5), 0.62, "hero");
-  setOrbit(new THREE.Vector3(-24, 6.1, -3), 44, 18, 82, 0.15, 0.95);
 }

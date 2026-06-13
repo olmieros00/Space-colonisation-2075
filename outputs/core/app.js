@@ -8,8 +8,9 @@ import { UI, closePanel } from "./ui.js";
 import { camState, enterInspection, exitInspection, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
 import { readyCinemaFonts, showCinematicTitle } from "./cinema.js";
+import { R } from "./constants.js";
 import { travel } from "./transitions.js";
-import { buildHub } from "../scenes/hub.js";
+import { buildHub } from "../scenes/hub/index.js";
 import { buildGateway } from "../scenes/gateway.js";
 import { buildMoon } from "../scenes/moon.js";
 import { buildOrbit } from "../scenes/orbit/index.js";
@@ -29,7 +30,6 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 configureTextureLoading(renderer);
 
-const R = 16;
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2400);
 const raycaster = new THREE.Raycaster();
 const clock = new THREE.Clock();
@@ -40,24 +40,6 @@ let scene = new THREE.Scene();
 const renderPass = new RenderPass(scene, camera);
 const composer = new EffectComposer(renderer);
 composer.addPass(renderPass);
-try {
-  const ssaoPass = new SSAOPass(scene, camera, innerWidth, innerHeight);
-  ssaoPass.kernelRadius = 8;
-  ssaoPass.minDistance = 0.002;
-  ssaoPass.maxDistance = 0.18;
-  composer.addPass(ssaoPass);
-  stateSetSSAOPass(ssaoPass);
-} catch {
-  stateSetSSAOPass(null);
-}
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.4, 0.6, 0.85);
-composer.addPass(bloomPass);
-composer.addPass(new OutputPass());
-
-function stateSetSSAOPass(pass) {
-  globalThis.__starbaseSSAOPass = pass;
-}
-
 const state = {
   scene,
   mode: "hub",
@@ -69,8 +51,22 @@ const state = {
   renderer,
   animated,
   composer,
-  renderPass
+  renderPass,
+  ssaoPass: null
 };
+try {
+  const ssaoPass = new SSAOPass(scene, camera, innerWidth, innerHeight);
+  ssaoPass.kernelRadius = 8;
+  ssaoPass.minDistance = 0.002;
+  ssaoPass.maxDistance = 0.18;
+  composer.addPass(ssaoPass);
+  state.ssaoPass = ssaoPass;
+} catch {
+  state.ssaoPass = null;
+}
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.4, 0.6, 0.85);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
 
 const assets = { earthMesh, moonMesh };
 
@@ -108,7 +104,7 @@ function resetScene() {
   scene = new THREE.Scene();
   state.scene = scene;
   renderPass.scene = scene;
-  if (globalThis.__starbaseSSAOPass) globalThis.__starbaseSSAOPass.scene = scene;
+  if (state.ssaoPass) state.ssaoPass.scene = scene;
   scene.fog = new THREE.FogExp2(0x05070b, 0.016);
   renderer.setClearColor(0x05070b, 1);
   renderer.toneMappingExposure = 1.25;
@@ -182,7 +178,7 @@ addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
   composer.setSize(innerWidth, innerHeight);
   bloomPass.setSize(innerWidth, innerHeight);
-  if (globalThis.__starbaseSSAOPass) globalThis.__starbaseSSAOPass.setSize(innerWidth, innerHeight);
+  if (state.ssaoPass) state.ssaoPass.setSize(innerWidth, innerHeight);
 });
 
 initCameraEvents(

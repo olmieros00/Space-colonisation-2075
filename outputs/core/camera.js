@@ -1,18 +1,19 @@
 import * as THREE from "three";
+import { R } from "./constants.js";
 
 export const camState = {
   orbitTarget: new THREE.Vector3(),
   orbitYaw: 0.3,
   orbitPitch: 0.18,
-  orbitDistance: 41.6,
-  orbitMin: 16.32,
-  orbitMax: 96,
+  orbitDistance: 2.6 * R,
+  orbitMin: 1.02 * R,
+  orbitMax: 6 * R,
   dragging: false,
   dragMoved: false,
   down: { x: 0, y: 0 },
   mouse: new THREE.Vector2(9, 9),
   focusTarget: new THREE.Vector3(),
-  focusDistance: 41.6,
+  focusDistance: 2.6 * R,
   focusTween: null,
   focusedObject: null,
   focusPauseRoot: null,
@@ -25,7 +26,7 @@ export const camState = {
   inspectionLocalTarget: new THREE.Vector3(),
   inspectionTween: null,
   inspectionRestore: null,
-  inspectionFocusDistance: 12.48
+  inspectionFocusDistance: 0.78 * R
 };
 
 const tmpFocusWorld = new THREE.Vector3();
@@ -169,8 +170,8 @@ export function exitInspection(camera, UI) {
     camera.updateProjectionMatrix();
   }
   if (camState.focusPauseRoot) camState.focusPauseRoot.userData.paused = true;
-  camState.orbitMin = 0.288;
-  camState.orbitMax = 31.2;
+  camState.orbitMin = 0.018 * R;
+  camState.orbitMax = 1.95 * R;
   camState.orbitDistance = camState.inspectionFocusDistance;
   if (camState.focusedObject) camState.orbitTarget.copy(focusWorldPosition(camState.focusedObject));
   if (UI.inspectBtn) {
