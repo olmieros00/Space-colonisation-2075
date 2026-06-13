@@ -37,8 +37,9 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 |---|---|
 | gateway.js | Gateway Station interior — sealed shell, bounded orbit camera, corridor, shuttle, Moon hologram, lighting |
 | moon.js | Lunar surface — regolith, Imbrium Haven, Earth in sky |
-| hub/index.js | Starbase Texas scene entry point and daylight setup |
-| hub/structures.js | Starbase rocket, pad, towers, campus, props, ground |
+| hub/index.js | Starbase Texas scene entry point |
+| hub/environment.js | Starbase daylight sky, PMREM environment, sun/fill lights, horizon ground, fog support |
+| hub/structures.js | Starbase rocket, pad, towers, campus, props, foreground ground/apron |
 | hub/textures.js | Starbase procedural canvas textures |
 | orbit/index.js | Orbit scene orchestration, camera params |
 | orbit/earth.js | Earth sphere — textures, day/night shader, clouds, atmosphere, Moon texture helper |
