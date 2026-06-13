@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { C, addInteractive, mat } from "../../core/materials.js";
+import { C, addInteractive } from "../../core/materials.js";
+import { buildSatelliteModel } from "./satelliteModel.js";
 
 const PLANE_COUNT = 10;
 const SATELLITES_PER_PLANE = 15;
@@ -31,67 +32,9 @@ function addPlaneGuideRing(scene, radius, planeNormal) {
 }
 
 function satellite(scene, R, interactive, satellites, focusOnObject, name, radius, speed, phase, prime = false, plane = 0, index = 0, planeNormal = ORBIT_NORMAL_BASE) {
-  const g = new THREE.Group();
-  const span = (prime ? 0.08 : 0.045) * R;
-  const bodySize = prime ? 0.010 * R : 0.007 * R;
-  const gold = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.9, roughness: 0.3 });
-  const solar = new THREE.MeshStandardMaterial({ color: 0x16294a, emissive: 0x2f5694, emissiveIntensity: 0.4, metalness: 0.28, roughness: 0.42 });
-  const frame = new THREE.MeshStandardMaterial({ color: 0x66778a, metalness: 0.75, roughness: 0.32 });
-  const bodyMat = prime ? mat.amber : gold;
-  const body = new THREE.Mesh(new THREE.BoxGeometry(bodySize, bodySize * 0.82, bodySize), bodyMat);
-  const wings = new THREE.Group();
-
-  function panelWing(axis = "x", dir = 1) {
-    const wing = new THREE.Group();
-    const panelLen = span * 0.18;
-    const gap = span * 0.012;
-    const panelDepth = span * 0.075;
-    const boomLength = span * 0.48;
-    const boomGeo = axis === "x"
-      ? new THREE.BoxGeometry(boomLength, span * 0.012, span * 0.012)
-      : new THREE.BoxGeometry(span * 0.012, span * 0.012, boomLength);
-    const boom = new THREE.Mesh(boomGeo, frame);
-    if (axis === "x") boom.position.x = dir * boomLength * 0.34;
-    else boom.position.z = dir * boomLength * 0.34;
-    wing.add(boom);
-    for (let i = 0; i < 3; i++) {
-      const offset = bodySize * 1.15 + dir * (i + 0.5) * (panelLen + gap);
-      const panel = new THREE.Mesh(
-        axis === "x"
-          ? new THREE.BoxGeometry(panelLen, span * 0.014, panelDepth)
-          : new THREE.BoxGeometry(panelDepth, span * 0.014, panelLen),
-        solar
-      );
-      if (axis === "x") panel.position.x = offset;
-      else panel.position.z = offset;
-      wing.add(panel);
-      const borderA = new THREE.Mesh(
-        axis === "x"
-          ? new THREE.BoxGeometry(panelLen, span * 0.017, span * 0.006)
-          : new THREE.BoxGeometry(span * 0.006, span * 0.017, panelLen),
-        frame
-      );
-      borderA.position.copy(panel.position);
-      if (axis === "x") borderA.position.z += panelDepth * 0.52;
-      else borderA.position.x += panelDepth * 0.52;
-      wing.add(borderA);
-    }
-    return wing;
-  }
-
-  wings.add(panelWing("x", 1), panelWing("x", -1));
-  if (prime) wings.add(panelWing("z", 1), panelWing("z", -1));
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(span * 0.006, span * 0.006, span * 0.16, 12), frame);
-  arm.rotation.x = Math.PI / 2;
-  arm.position.z = -bodySize * 1.25;
-  const dish = new THREE.Mesh(new THREE.SphereGeometry(prime ? span * 0.12 : span * 0.09, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat.white);
-  dish.rotation.x = Math.PI / 2;
-  dish.position.z = -bodySize * 2.15;
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(span * 0.005, span * 0.005, prime ? span * 0.42 : span * 0.28, 10), frame);
-  mast.position.y = prime ? span * 0.26 : span * 0.18;
-  g.add(body, wings, arm, dish, mast);
-  if (prime) g.scale.setScalar(1.7);
-  g.userData = {
+  const g = buildSatelliteModel(R, prime);
+  const primaryBody = g.userData.primaryBody;
+  Object.assign(g.userData, {
     radius,
     speed,
     phase,
@@ -101,10 +44,10 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
     inclination: WALKER_INCLINATION,
     ascendingNode: plane * (Math.PI * 2 / PLANE_COUNT),
     orbitalNormal: planeNormal.clone()
-  };
+  });
   if (prime) {
     g.userData.focusable = true;
-    addInteractive(interactive, body, name, () => focusOnObject(g), "The first bright node of the Guardian Net");
+    addInteractive(interactive, primaryBody, name, () => focusOnObject(g), "The first bright node of the Guardian Net");
   }
   satellites.push(g);
   scene.add(g);
@@ -155,7 +98,8 @@ export function updateConstellation(satellites, t) {
   const pos = new THREE.Vector3();
   const radial = new THREE.Vector3();
   const tangent = new THREE.Vector3();
-  const wingAxis = new THREE.Vector3();
+  const solarAxis = new THREE.Vector3();
+  const nadir = new THREE.Vector3();
   const rotation = new THREE.Matrix4();
   for (const s of satellites) {
     const d = s.userData;
@@ -166,8 +110,9 @@ export function updateConstellation(satellites, t) {
     s.position.copy(pos);
     radial.copy(pos).normalize();
     tangent.crossVectors(d.orbitalNormal, radial).normalize();
-    wingAxis.crossVectors(radial, tangent).normalize();
-    rotation.makeBasis(wingAxis, radial, tangent);
+    nadir.copy(radial).multiplyScalar(-1);
+    solarAxis.crossVectors(nadir, tangent).normalize();
+    rotation.makeBasis(tangent, solarAxis, nadir);
     s.quaternion.setFromRotationMatrix(rotation);
   }
 }

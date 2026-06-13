@@ -49,6 +49,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | orbit/earth.js | Earth sphere — textures, day/night shader, clouds, atmosphere, Moon texture helper |
 | orbit/solarsystem.js | Visible Sun, corona glow, co-located directional light, distant planet discs |
 | orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |
+| orbit/satelliteModel.js | Detailed physical satellite bus model: MLI body, nadir payload, arrays, ADCS, propulsion |
 | orbit/swarm.js | Dense GPU traffic-lane satellite layer, zoom-faded near Earth, non-interactive |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, inspection massing, habitation silhouettes |
 | orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub |
