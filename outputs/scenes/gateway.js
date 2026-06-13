@@ -5,6 +5,23 @@ import { box, cyl } from "../core/primitives.js";
 import { setOrbit } from "../core/camera.js";
 
 const TWO_PI = Math.PI * 2;
+const GATEWAY_BOUNDS = {
+  min: new THREE.Vector3(-2.15, 1.55, -34.0),
+  max: new THREE.Vector3(2.15, 4.25, 5.5)
+};
+
+function addSealedShell(scene) {
+  const hull = new THREE.Mesh(
+    new THREE.BoxGeometry(16, 7, 45),
+    new THREE.MeshBasicMaterial({ color: 0x2b3038, side: THREE.BackSide })
+  );
+  hull.position.set(0, 2.9, -13.8);
+  scene.add(hull);
+  scene.add(box(15, 0.12, 45, mat.white, 0, -0.1, -13.8));
+  scene.add(box(15, 0.12, 45, mat.white, 0, 5.82, -13.8));
+  scene.add(box(0.16, 6.0, 45, mat.white, -7.35, 2.8, -13.8));
+  scene.add(box(0.16, 6.0, 45, mat.white, 7.35, 2.8, -13.8));
+}
 
 function makeLineTexture() {
   const cnv = document.createElement("canvas");
@@ -258,10 +275,12 @@ export function buildGateway(scene, camera, camState, interactive, animated, UI,
   UI.hint.textContent = "Look through the bright transfer concourse. Hover displays. Click Imbrium Transit when the Moon starts calling.";
   state.renderer.setClearColor(0xf2f2ec, 1);
   state.renderer.toneMappingExposure = 0.46;
+  scene.background = new THREE.Color(0xd8d8d2);
   scene.fog = new THREE.FogExp2(0xf2f2ec, 0.0025);
   scene.add(new THREE.AmbientLight(0xffffff, 0.95));
   scene.add(new THREE.HemisphereLight(0xffffff, 0xffe8b0, 0.58));
 
+  addSealedShell(scene);
   addReceptionLounge(scene);
   addMoonHologram(scene, interactive, animated, assets);
   addCurvedCorridor(scene);
@@ -269,5 +288,5 @@ export function buildGateway(scene, camera, camState, interactive, animated, UI,
   addPaddedSection(scene);
   addShuttleDock(scene, interactive, travel);
 
-  setOrbit(new THREE.Vector3(0, 2.4, -12.5), 18, 5.5, 34, 0.07, 0.02);
+  setOrbit(new THREE.Vector3(0, 2.55, -23.5), 4.0, 2.4, 4.8, 0.03, 0.02, GATEWAY_BOUNDS, { min: -0.24, max: 0.34 });
 }

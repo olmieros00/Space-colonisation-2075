@@ -5,6 +5,8 @@ export const camState = {
   orbitTarget: new THREE.Vector3(),
   orbitYaw: 0.3,
   orbitPitch: 0.18,
+  pitchMin: -1.4,
+  pitchMax: 1.4,
   orbitDistance: 2.6 * R,
   orbitMin: 1.02 * R,
   orbitMax: 6 * R,
@@ -22,6 +24,7 @@ export const camState = {
   focusExitDistance: 0,
   focusExitCallback: null,
   structureDestination: null,
+  bounds: null,
   canInspect: false,
   inspectionActive: false,
   inspectionRoot: null,
@@ -50,13 +53,16 @@ function releaseFocusPause() {
   }
 }
 
-export function setOrbit(target, distance, min, max, pitch, yaw = 0.55) {
+export function setOrbit(target, distance, min, max, pitch, yaw = 0.55, bounds = null, pitchLimits = null) {
   camState.orbitTarget.copy(target);
   camState.orbitDistance = distance;
   camState.orbitMin = min;
   camState.orbitMax = max;
   camState.orbitPitch = pitch;
   camState.orbitYaw = yaw;
+  camState.bounds = bounds;
+  camState.pitchMin = pitchLimits?.min ?? -1.4;
+  camState.pitchMax = pitchLimits?.max ?? 1.4;
 }
 
 export function easeInOut(t) {
@@ -226,7 +232,18 @@ export function updateCamera(camera) {
   const x = Math.sin(camState.orbitYaw) * Math.cos(camState.orbitPitch) * camState.orbitDistance;
   const y = Math.sin(camState.orbitPitch) * camState.orbitDistance;
   const z = Math.cos(camState.orbitYaw) * Math.cos(camState.orbitPitch) * camState.orbitDistance;
+  if (camState.bounds) camState.orbitTarget.clamp(camState.bounds.min, camState.bounds.max);
   camera.position.set(camState.orbitTarget.x + x, camState.orbitTarget.y + y, camState.orbitTarget.z + z);
+  if (camState.bounds) {
+    const d = camera.position.clone().sub(camState.orbitTarget);
+    let t = 1;
+    for (const axis of ["x", "y", "z"]) {
+      if (camera.position[axis] > camState.bounds.max[axis]) t = Math.min(t, (camState.bounds.max[axis] - camState.orbitTarget[axis]) / d[axis]);
+      if (camera.position[axis] < camState.bounds.min[axis]) t = Math.min(t, (camState.bounds.min[axis] - camState.orbitTarget[axis]) / d[axis]);
+    }
+    if (t < 1) camera.position.copy(camState.orbitTarget).addScaledVector(d, Math.max(0.05, t));
+    camera.position.clamp(camState.bounds.min, camState.bounds.max);
+  }
   camera.lookAt(camState.orbitTarget);
 }
 
@@ -252,7 +269,7 @@ export function initCameraEvents(renderer, camera, state, onClickCallback, onMov
     if (state.dragging) {
       state.orbitYaw += e.movementX * -0.005;
       state.orbitPitch += e.movementY * 0.005;
-      state.orbitPitch = THREE.MathUtils.clamp(state.orbitPitch, -1.4, 1.4);
+      state.orbitPitch = THREE.MathUtils.clamp(state.orbitPitch, state.pitchMin, state.pitchMax);
       if (Math.hypot(e.clientX - state.down.x, e.clientY - state.down.y) > 5) state.dragMoved = true;
     }
   });

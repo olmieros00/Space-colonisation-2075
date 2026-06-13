@@ -89,6 +89,7 @@ function resetScene() {
   camState.focusPauseRoot = null;
   camState.inputMode = "orbit";
   camState.structureDestination = null;
+  camState.bounds = null;
   camState.isFocused = false;
   camState.canInspect = false;
   camState.inspectionActive = false;

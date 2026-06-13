@@ -35,7 +35,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ### scenes/
 | File | Edit when you need to change |
 |---|---|
-| gateway.js | Gateway Station interior — corridor, shuttle, Moon hologram, lighting |
+| gateway.js | Gateway Station interior — sealed shell, bounded orbit camera, corridor, shuttle, Moon hologram, lighting |
 | moon.js | Lunar surface — regolith, Imbrium Haven, Earth in sky |
 | hub/index.js | Starbase Texas scene entry point and daylight setup |
 | hub/structures.js | Starbase rocket, pad, towers, campus, props, ground |
