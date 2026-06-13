@@ -1,4 +1,9 @@
 import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { UI, closePanel } from "./ui.js";
 import { camState, focusEarth, focusOnObject as focusCameraOnObject, initCameraEvents, updateCamera } from "./camera.js";
 import { C, configureTextureLoading } from "./materials.js";
@@ -30,6 +35,26 @@ const interactive = [];
 const satellites = [];
 const animated = [];
 let scene = new THREE.Scene();
+const renderPass = new RenderPass(scene, camera);
+const composer = new EffectComposer(renderer);
+composer.addPass(renderPass);
+try {
+  const ssaoPass = new SSAOPass(scene, camera, innerWidth, innerHeight);
+  ssaoPass.kernelRadius = 8;
+  ssaoPass.minDistance = 0.002;
+  ssaoPass.maxDistance = 0.18;
+  composer.addPass(ssaoPass);
+  stateSetSSAOPass(ssaoPass);
+} catch {
+  stateSetSSAOPass(null);
+}
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.4, 0.6, 0.85);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
+
+function stateSetSSAOPass(pass) {
+  globalThis.__starbaseSSAOPass = pass;
+}
 
 const state = {
   scene,
@@ -40,7 +65,9 @@ const state = {
   launching: false,
   activeSun: null,
   renderer,
-  animated
+  animated,
+  composer,
+  renderPass
 };
 
 const assets = { earthMesh, moonMesh };
@@ -63,8 +90,11 @@ function resetScene() {
   if (UI.earthViewBtn) UI.earthViewBtn.style.display = "none";
   scene = new THREE.Scene();
   state.scene = scene;
+  renderPass.scene = scene;
+  if (globalThis.__starbaseSSAOPass) globalThis.__starbaseSSAOPass.scene = scene;
   scene.fog = new THREE.FogExp2(0x05070b, 0.016);
   renderer.setClearColor(0x05070b, 1);
+  renderer.toneMappingExposure = 1.25;
 }
 
 function go(dest) {
@@ -126,13 +156,16 @@ function animate() {
   updateCamera(camera, camState, dt);
   if (state.mode === "moon") UI.welcome.classList.toggle("show", camState.orbitDistance < 15);
   pick();
-  renderer.render(scene, camera);
+  composer.render();
 }
 
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+  bloomPass.setSize(innerWidth, innerHeight);
+  if (globalThis.__starbaseSSAOPass) globalThis.__starbaseSSAOPass.setSize(innerWidth, innerHeight);
 });
 
 initCameraEvents(
