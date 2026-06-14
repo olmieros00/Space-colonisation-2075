@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { C, addInteractive } from "../../core/materials.js";
 import { buildSatelliteModel } from "./satelliteModel.js";
 
-const PLANE_COUNT = 10;
-const SATELLITES_PER_PLANE = 15;
+const PLANE_COUNT = 6;
+const SATELLITES_PER_PLANE = 8;
 const WALKER_INCLINATION = 0.925;
 const ORBIT_NORMAL_BASE = new THREE.Vector3(0, 1, 0);
 const TWO_PI = Math.PI * 2;
@@ -75,7 +75,7 @@ export function buildConstellation(scene, R, interactive, animated, satellites, 
 
   const lineGeo = new THREE.BufferGeometry();
   const linePos = [];
-  const linkCount = 36;
+  const linkCount = 16;
   for (let i = 0; i < linkCount; i++) linePos.push(0, 0, 0, 0, 0, 0);
   lineGeo.setAttribute("position", new THREE.Float32BufferAttribute(linePos, 3));
   const links = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ color: C.amber, transparent: true, opacity: 0.12 }));
