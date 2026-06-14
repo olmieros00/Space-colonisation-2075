@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { greeble } from "../../core/greeble.js";
+import { swapWithGLB } from "../../core/assets.js";
 import { mat } from "../../core/materials.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 
@@ -94,6 +95,7 @@ function addTerminals(group) {
   capsule.add(cyl(4.8, 6.4, 8, mat.white, 36));
   capsule.add(new THREE.Mesh(new THREE.ConeGeometry(4.8, 5.6, 36), mat.white));
   capsule.children[1].position.y = 6.8;
+  swapWithGLB(capsule, "assets/dragon_capsule.glb", { height: 12, object: "Starcloud docked servicing capsule", scene: "Starcloud deck" });
   group.add(capsule);
 }
 

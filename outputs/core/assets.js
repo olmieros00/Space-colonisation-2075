@@ -18,6 +18,21 @@ const HDRI_BY_TYPE = {
   interior: "assets/env_interior.hdr"
 };
 
+function assetMeta(path, meta = {}) {
+  const file = path.replace(/^assets\//, "");
+  return {
+    file,
+    object: meta.object || file,
+    scene: meta.scene || "shared scene"
+  };
+}
+
+function assetLog(status, path, meta, extra = "") {
+  const m = assetMeta(path, meta);
+  if (status === "OK") console.log(`[assets] OK: ${m.file} → ${m.object} (${m.scene})${extra}`);
+  else console.warn(`[assets] MISSING: ${m.file} → procedural fallback (place it at outputs/assets/${m.file})`);
+}
+
 export function configureAssetLoading(renderer) {
   rendererRef = renderer;
 }
@@ -54,62 +69,80 @@ function cloneGLB(root) {
   return prepareAsset(root.clone(true));
 }
 
-export function loadGLB(path, onLoad, onFallback = () => {}) {
+export function loadGLB(path, onLoad, onFallback = () => {}, meta = {}) {
   if (glbMissing.has(path)) {
-    queueMicrotask(() => onFallback());
+    queueMicrotask(() => {
+      assetLog("MISSING", path, meta);
+      onFallback();
+    });
     return;
   }
   if (glbCache.has(path)) {
-    queueMicrotask(() => onLoad(cloneGLB(glbCache.get(path))));
+    queueMicrotask(() => {
+      assetLog("OK", path, meta, " [cached]");
+      onLoad(cloneGLB(glbCache.get(path)));
+    });
     return;
   }
   if (glbPending.has(path)) {
-    glbPending.get(path).push({ onLoad, onFallback });
+    glbPending.get(path).push({ onLoad, onFallback, meta });
     return;
   }
-  glbPending.set(path, [{ onLoad, onFallback }]);
+  glbPending.set(path, [{ onLoad, onFallback, meta }]);
   gltfLoader.load(
     path,
     gltf => {
       glbCache.set(path, gltf.scene);
       const pending = glbPending.get(path) || [];
       glbPending.delete(path);
-      for (const job of pending) job.onLoad(cloneGLB(gltf.scene));
+      for (const job of pending) {
+        assetLog("OK", path, job.meta);
+        job.onLoad(cloneGLB(gltf.scene));
+      }
     },
     undefined,
     err => {
       glbMissing.add(path);
       const pending = glbPending.get(path) || [];
       glbPending.delete(path);
-      for (const job of pending) job.onFallback(err);
+      for (const job of pending) {
+        assetLog("MISSING", path, job.meta);
+        job.onFallback(err);
+      }
     }
   );
 }
 
-export function swapWithGLB(container, path, { height = 1, y = 0, rotation = null } = {}) {
+export function swapWithGLB(container, path, { height = 1, y = 0, rotation = null, object = null, scene = null } = {}) {
   loadGLB(path, asset => {
     fitAssetToHeight(asset, height);
     if (rotation) asset.rotation.set(rotation.x || 0, rotation.y || 0, rotation.z || 0);
     asset.position.y += y;
     container.clear();
     container.add(asset);
-  });
+  }, undefined, { object, scene });
 }
 
-export function loadHDRI(path, onReady, onFallback = () => {}) {
+export function loadHDRI(path, onReady, onFallback = () => {}, meta = {}) {
   if (!rendererRef || hdriMissing.has(path)) {
-    queueMicrotask(() => onFallback());
+    queueMicrotask(() => {
+      assetLog("MISSING", path, meta);
+      onFallback();
+    });
     return;
   }
   if (hdriCache.has(path)) {
-    queueMicrotask(() => onReady(hdriCache.get(path)));
+    queueMicrotask(() => {
+      assetLog("OK", path, meta, " [cached]");
+      onReady(hdriCache.get(path));
+    });
     return;
   }
   if (hdriPending.has(path)) {
-    hdriPending.get(path).push({ onReady, onFallback });
+    hdriPending.get(path).push({ onReady, onFallback, meta });
     return;
   }
-  hdriPending.set(path, [{ onReady, onFallback }]);
+  hdriPending.set(path, [{ onReady, onFallback, meta }]);
   rgbeLoader.load(
     path,
     texture => {
@@ -121,20 +154,27 @@ export function loadHDRI(path, onReady, onFallback = () => {}) {
       pmrem.dispose();
       const pending = hdriPending.get(path) || [];
       hdriPending.delete(path);
-      for (const job of pending) job.onReady(target.texture);
+      for (const job of pending) {
+        assetLog("OK", path, job.meta);
+        job.onReady(target.texture);
+      }
     },
     undefined,
     err => {
       hdriMissing.add(path);
       const pending = hdriPending.get(path) || [];
       hdriPending.delete(path);
-      for (const job of pending) job.onFallback(err);
+      for (const job of pending) {
+        assetLog("MISSING", path, job.meta);
+        job.onFallback(err);
+      }
     }
   );
 }
 
 export function applyHDRIEnvironment(scene, type, onFallback = () => {}) {
-  loadHDRI(HDRI_BY_TYPE[type] || HDRI_BY_TYPE.space, envMap => {
+  const path = HDRI_BY_TYPE[type] || HDRI_BY_TYPE.space;
+  loadHDRI(path, envMap => {
     scene.environment = envMap;
-  }, onFallback);
+  }, onFallback, { object: `${type} HDRI environment`, scene: `${type} environment` });
 }

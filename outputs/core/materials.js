@@ -15,12 +15,20 @@ export const mat = {
   dark: makePBR({ color: C.charcoal, metalness: 0.34, roughness: 0.62, normalScale: 0.52, repeat: 2.2 }),
   white: makePBR({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.42, normalScale: 0.48, repeat: 2 }),
   black: makePBR({ color: 0x050609, metalness: 0.5, roughness: 0.36, normalScale: 0.42, repeat: 2.4 }),
+  hullSteel: makePBR({ color: C.beskar, metalness: 0.72, roughness: 0.34, normalScale: 1.0, repeat: 3 }),
+  whitePanel: makePBR({ color: 0xe8e8e0, metalness: 0.52, roughness: 0.34, normalScale: 1.0, repeat: 2.6 }),
+  darkMetal: makePBR({ color: 0x11151b, metalness: 0.7, roughness: 0.42, normalScale: 0.95, repeat: 3 }),
+  solar: makePBR({ color: 0x16294a, metalness: 0.55, roughness: 0.32, normalScale: 0.85, repeat: 4 }),
+  copperFrame: makePBR({ color: 0x7a4a32, metalness: 0.78, roughness: 0.44, normalScale: 1.0, repeat: 3.2 }),
   amber: new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.95, transparent: true, opacity: 0.82 }),
   glass: new THREE.MeshPhysicalMaterial({ color: 0x7cc7ff, metalness: 0, roughness: 0.05, transmission: 0.45, transparent: true, opacity: 0.35 }),
+  glassPanel: new THREE.MeshPhysicalMaterial({ color: 0x8ed4ff, metalness: 0.05, roughness: 0.08, transmission: 0.28, transparent: true, opacity: 0.42, envMapIntensity: 1.0 }),
   regolith: new THREE.MeshStandardMaterial({ color: 0x7f817d, roughness: 0.92 }),
   cream: new THREE.MeshStandardMaterial({ color: 0xded8c5, roughness: 0.65, metalness: 0.04 })
 };
 mat.amber.userData.baseEmissive = C.amber;
+mat.solar.emissive = new THREE.Color(0x2f5694);
+mat.solar.emissiveIntensity = 0.22;
 
 const PLANET_TEXTURE_BASE = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/";
 const planetLoader = new THREE.TextureLoader();

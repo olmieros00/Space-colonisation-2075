@@ -250,6 +250,7 @@ function addDragonCapsule(root, R) {
   }
   capsule.position.set(-0.39 * R, 0.18 * R, 0.24 * R);
   capsule.rotation.set(-0.9, 0.55, -0.42);
+  swapWithGLB(capsule, "assets/dragon_capsule.glb", { height: 0.13 * R, object: "Starcloud Dragon servicing capsule", scene: "Orbit Starcloud" });
   root.add(capsule);
 }
 
@@ -270,7 +271,7 @@ function addHumanScaleMarkers(root) {
     figure.add(body, visor);
     figure.position.set(x, y, z);
     figure.rotation.y = (i % 2 ? 0.2 : -0.25) + (z > 0 ? Math.PI : 0);
-    swapWithGLB(figure, "assets/figure.glb", { height: 0.042 });
+    swapWithGLB(figure, "assets/figure.glb", { height: 0.042, object: "Starcloud inspection figure", scene: "Orbit Starcloud inspection" });
     root.add(figure);
   }
 }
@@ -425,7 +426,7 @@ function treadwellDroid(R, i, mats) {
   droid.userData.armB = armB;
   droid.userData.spark = spark;
   installCrawler(droid, i, R);
-  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R });
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R, object: "Starcloud treadwell service droid", scene: "Orbit Starcloud inspection" });
   return droid;
 }
 
@@ -456,7 +457,7 @@ function mouseDroid(R, i, mats) {
   droid.position.set(0, 0.018 * R, 0);
   droid.userData.redLamp = lamp;
   installCrawler(droid, i, R, true);
-  swapWithGLB(droid, "assets/droid.glb", { height: 0.045 * R });
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.045 * R, object: "Starcloud mouse service droid", scene: "Orbit Starcloud inspection" });
   return droid;
 }
 
@@ -487,7 +488,7 @@ function technicianDroid(R, i, mats) {
   droid.position.set(0, 0.027 * R, 0);
   droid.userData.head = head;
   installCrawler(droid, i, R);
-  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R });
+  swapWithGLB(droid, "assets/droid.glb", { height: 0.052 * R, object: "Starcloud technician service droid", scene: "Orbit Starcloud inspection" });
   return droid;
 }
 
@@ -504,7 +505,7 @@ function buildProxyDroids(parent, R) {
     droid.add(body, dot);
     droid.position.y = 0.021 * R;
     installCrawler(droid, i, R, i % 4 === 0);
-    swapWithGLB(droid, "assets/droid.glb", { height: 0.04 * R });
+    swapWithGLB(droid, "assets/droid.glb", { height: 0.04 * R, object: "Starcloud proxy service droid", scene: "Orbit Starcloud inspection" });
     droids.add(droid);
   }
   parent.add(droids);

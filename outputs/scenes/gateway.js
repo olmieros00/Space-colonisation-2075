@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { addInteractive, glowRing, mat } from "../core/materials.js";
-import { applyHDRIEnvironment } from "../core/assets.js";
+import { applyHDRIEnvironment, swapWithGLB } from "../core/assets.js";
 import { label } from "../core/labels.js";
 import { box, cyl } from "../core/primitives.js";
 import { makeEnv } from "../core/pbr.js";
@@ -110,6 +110,7 @@ function addReceptionLounge(scene) {
   desk.add(box(4.5, 1.0, 0.78, white, 0, 0.5, 0));
   desk.add(box(4.8, 0.08, 0.95, black, 0, 1.04, 0));
   desk.position.set(-2.8, 0, 7.5);
+  swapWithGLB(desk, "assets/gateway_desk.glb", { height: 1.15, object: "Gateway reception desk", scene: "Gateway interior" });
   scene.add(desk);
 
   for (let i = 0; i < 5; i++) {
@@ -121,6 +122,7 @@ function addReceptionLounge(scene) {
     chair.add(seat, back);
     chair.position.set(-4 + (i % 3) * 4, 0.25, 2.2 + Math.floor(i / 3) * 2.8);
     chair.rotation.y = i * 0.65;
+    swapWithGLB(chair, "assets/gateway_chair.glb", { height: 0.95, object: "Gateway reception chair", scene: "Gateway interior" });
     scene.add(chair);
   }
 
@@ -265,6 +267,7 @@ function addShuttleDock(scene, interactive, travel) {
   const tail = box(0.16, 1.0, 0.9, black, 0, 0.72, 1.6);
   shuttle.add(fuselage, nose, wing, tail);
   shuttle.position.set(0, 1.42, -30.3);
+  swapWithGLB(shuttle, "assets/dragon_capsule.glb", { height: 2.0, object: "Imbrium Transit shuttle", scene: "Gateway shuttle dock" });
   scene.add(shuttle);
   addInteractive(interactive, fuselage, "Imbrium Transit", () => travel("moon"), "Docked lunar shuttle — click to cross the last dark");
   label(scene, "IMBRIUM // TRANSIT", new THREE.Vector3(0, 3.65, -30.3), 0.62, "hero");

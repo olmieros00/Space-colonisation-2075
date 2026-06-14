@@ -21,13 +21,13 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ### core/
 | File | Edit when you need to change |
 |---|---|
-| assets.js | Optional GLB/HDRI loader pipeline with same-origin fallbacks |
+| assets.js | Turnkey GLB/HDRI loader pipeline with loud console OK/MISSING logs and procedural fallbacks |
 | app.js | Animation loop, renderer setup, shared state, scene switching, persistent destination-menu wiring |
 | camera.js | Orbit controls, fly-to zoom, Starcloud inspection sub-state, drag/wheel/click behaviour |
 | cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
 | constants.js | Shared scale constants, currently `R = 16` |
 | labels.js | Canvas sprite label system and label-tier typography |
-| materials.js | Shared colour palette, material definitions, stars, texture loading |
+| materials.js | Shared colour palette, PBR material definitions, stars, texture loading |
 | pbr.js | Procedural hard-surface PBR maps and per-scene PMREM environment maps |
 | greeble.js | Lightweight instanced panels, bolts, and vents for large bare surfaces |
 | primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |
@@ -52,7 +52,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | orbit/satelliteModel.js | Detailed physical satellite bus model: MLI body, nadir payload, arrays, ADCS, propulsion |
 | orbit/swarm.js | Dense GPU traffic-lane satellite layer, zoom-faded near Earth, non-interactive |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, inspection massing, habitation silhouettes |
-| orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub |
+| orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub, PBR pilot surface routing |
 | starcloud/index.js | Starcloud first-person scene orchestration, 1m scale camera setup, sealed sky and Earth backdrop |
 | starcloud/unit.js | One whitepaper-scale Starcloud unit: 4km spine, solar wings, radiators, compute containers |
 | starcloud/constellation.js | Tiled Starcloud unit field and distant LOD silhouettes stretching to the horizon |
@@ -68,7 +68,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 ### assets/
 | File | Purpose |
 |---|---|
-| README.md | Optional local asset manifest for `rocket.glb`, `droid.glb`, `figure.glb`, and HDRIs |
+| README.md | Authoritative drop-in asset manifest with exact filenames, replacement targets, scene scale, and console log contract |
 
 ## Scale anchor
 `const R = 16` in `core/app.js` is Earth's radius in scene units. Orbit-scene objects are sized as multiples of `R`.

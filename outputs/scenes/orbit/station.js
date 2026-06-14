@@ -59,9 +59,9 @@ function addLatticeArc(root, R, radius, tube, z, material, start = 0, end = TWO_
 function addHabRing(station, animated, R, z, radius, finished = 1, spin = 0.08) {
   const ringGroup = new THREE.Group();
   const tube = 0.018 * R;
-  const copper = new THREE.MeshStandardMaterial({ color: 0x7a4a32, metalness: 0.55, roughness: 0.5 });
+  const copper = mat.copperFrame;
   const windowMat = new THREE.MeshBasicMaterial({ color: 0xffe8b0 });
-  const finishedMat = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.38 });
+  const finishedMat = mat.whitePanel;
   const finishedArc = finished * TWO_PI;
 
   if (finished > 0) {
@@ -87,8 +87,8 @@ function addHabRing(station, animated, R, z, radius, finished = 1, spin = 0.08) 
 
 function addUtilityRing(station, R, z, radius, variant = "docking") {
   const ringGroup = new THREE.Group();
-  const copper = new THREE.MeshStandardMaterial({ color: 0x7a4a32, metalness: 0.55, roughness: 0.5 });
-  const steel = mat.beskar;
+  const copper = mat.copperFrame;
+  const steel = mat.hullSteel;
   const tube = 0.008 * R;
   const ringMat = variant === "construction" ? copper : steel;
   const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 14, 96), ringMat);
@@ -107,7 +107,7 @@ function addUtilityRing(station, R, z, radius, variant = "docking") {
   }
 
   if (variant === "solar") {
-    const solarMat = new THREE.MeshStandardMaterial({ color: 0x16294a, emissive: 0x2f5694, emissiveIntensity: 0.22, metalness: 0.25, roughness: 0.42 });
+    const solarMat = mat.solar;
     for (const side of [-1, 1]) {
       const boom = box(0.010 * R, 0.010 * R, 0.18 * R, steel, 0, 0, 0);
       boom.position.set(side * (radius + 0.02 * R), 0, z);
@@ -130,9 +130,9 @@ function addUtilityRing(station, R, z, radius, variant = "docking") {
 
 function addSpine(station, R) {
   const core = new THREE.Group();
-  const steel = mat.beskar;
-  const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.16, roughness: 0.36 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1a1d24, metalness: 0.45, roughness: 0.5 });
+  const steel = mat.hullSteel;
+  const white = mat.whitePanel;
+  const dark = mat.darkMetal;
   const length = 0.70 * R;
   for (let i = 0; i < 21; i++) {
     const t = i / 20;
@@ -168,8 +168,8 @@ function addSpine(station, R) {
 }
 
 function addBuddingModules(station, R) {
-  const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.16, roughness: 0.42 });
-  const copper = new THREE.MeshStandardMaterial({ color: 0x7a4a32, metalness: 0.55, roughness: 0.5 });
+  const white = mat.whitePanel;
+  const copper = mat.copperFrame;
   for (let i = 0; i < 9; i++) {
     const side = i % 2 ? 1 : -1;
     const z = -0.27 * R + i * 0.07 * R;
@@ -185,8 +185,8 @@ function addBuddingModules(station, R) {
 }
 
 function addBerthedCapsule(station, R) {
-  const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.18, roughness: 0.4 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x11151b, metalness: 0.45, roughness: 0.48 });
+  const white = mat.whitePanel;
+  const dark = mat.darkMetal;
   const capsule = new THREE.Group();
   const body = cyl(0.026 * R, 0.032 * R, 0.060 * R, white, 28, 0, 0, 0);
   body.rotation.x = Math.PI / 2;
@@ -229,7 +229,7 @@ function buildGatewayStation(R, animated) {
     minSize: 0.005 * R,
     maxSize: 0.026 * R,
     depth: 0.0018 * R
-  }, 260);
+  }, 420);
   return station;
 }
 

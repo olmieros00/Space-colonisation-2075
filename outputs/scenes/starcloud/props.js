@@ -27,7 +27,18 @@ function droid(group, x, z, scale = 1) {
   root.add(box(0.5 * scale, 0.28 * scale, 0.34 * scale, droidMat, 0, 1.92 * scale, 0));
   root.add(box(0.12 * scale, 0.08 * scale, 0.04 * scale, eyeMat, 0, 1.95 * scale, -0.18 * scale));
   root.add(box(0.08 * scale, 1.1 * scale, 0.08 * scale, mat.beskar, -0.42 * scale, 1.05 * scale, 0));
-  swapWithGLB(root, "assets/droid.glb", { height: 2.05 * scale });
+  swapWithGLB(root, "assets/droid.glb", { height: 2.05 * scale, object: "Starcloud service droid", scene: "Starcloud deck" });
+  group.add(root);
+}
+
+function suitedFigure(group, x, z, rot = 0) {
+  const root = new THREE.Group();
+  root.position.set(x, 0, z);
+  root.rotation.y = rot;
+  root.add(cyl(0.22, 0.18, 1.25, mat.white, 12, 0, 0.8, 0));
+  root.add(new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 10), mat.white));
+  root.children[1].position.y = 1.58;
+  swapWithGLB(root, "assets/figure.glb", { height: 1.8, object: "suited human figure", scene: "Starcloud deck" });
   group.add(root);
 }
 
@@ -47,6 +58,7 @@ export function buildDeckProps(scene, colliders) {
   ].forEach(p => crate(group, colliders, ...p));
   [[-88, -174, 8], [-29, -45, 5], [-88, 76, 7], [-31, 118, 6]].forEach(p => antenna(group, colliders, ...p));
   [[-52, 118, 1.1], [-70, -15, 0.9], [-46, -112, 1], [-78, 54, 0.8]].forEach(p => droid(group, ...p));
+  [[-66, 96, 0.2], [-44, 46, -0.4], [-80, -126, 0.7]].forEach(p => suitedFigure(group, ...p));
   scene.add(group);
   return group;
 }

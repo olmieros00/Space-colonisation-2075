@@ -35,7 +35,7 @@ export function buildHub(scene, camera, camState, interactive, animated, UI, tra
 
   const rocket = buildRocket();
   rocket.position.set(-24, 0.55, -2);
-  swapWithGLB(rocket, "assets/rocket.glb", { height: 24.6 });
+  swapWithGLB(rocket, "assets/rocket.glb", { height: 24.6, object: "Colossus Heavy launch vehicle", scene: "Hub / Starbase" });
   state.hubRocket = rocket;
   scene.add(addInteractive(interactive, rocket, "Colossus Heavy", () => travel("orbit"), "Click to light the engines and climb toward the blue world above"));
 

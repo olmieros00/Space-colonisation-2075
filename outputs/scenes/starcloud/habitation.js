@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { swapWithGLB } from "../../core/assets.js";
 import { mat } from "../../core/materials.js";
 import { box, cyl } from "../../core/primitives.js";
 
@@ -40,27 +41,39 @@ function addBoulevard(group) {
 }
 
 function addDomeHouse(group, colliders, x, z, r) {
-  const base = cyl(r, r, 4, wallMat, 36, x, 2, z);
+  const house = new THREE.Group();
+  house.position.set(x, 0, z);
+  const base = cyl(r, r, 4, wallMat, 36, 0, 2, 0);
   const dome = new THREE.Mesh(new THREE.SphereGeometry(r, 36, 16, 0, Math.PI * 2, 0, Math.PI / 2), wallMat);
-  dome.position.set(x, 4, z);
+  dome.position.set(0, 4, 0);
   dome.scale.y = 0.58;
-  const window = box(r * 1.25, 3.8, 0.18, glowMat, x, 4.2, z - r - 0.08);
-  group.add(base, dome, window);
+  const window = box(r * 1.25, 3.8, 0.18, glowMat, 0, 4.2, -r - 0.08);
+  house.add(base, dome, window);
+  swapWithGLB(house, "assets/starcloud_habitat_dome.glb", { height: r * 1.05, object: "Starcloud dome habitat", scene: "Starcloud deck" });
+  group.add(house);
   habCollider(colliders, r * 2, 9, r * 2, x, 4.5, z);
 }
 
 function addPodHouse(group, colliders, x, z, len) {
-  const pod = cyl(6, 6, len, wallMat, 32, x, 5, z);
+  const house = new THREE.Group();
+  house.position.set(x, 0, z);
+  const pod = cyl(6, 6, len, wallMat, 32, 0, 5, 0);
   pod.rotation.z = Math.PI / 2;
-  group.add(pod);
-  group.add(box(7, 3.4, 0.16, glowMat, x - len / 2 - 0.1, 5, z));
+  house.add(pod);
+  house.add(box(7, 3.4, 0.16, glowMat, -len / 2 - 0.1, 5, 0));
+  swapWithGLB(house, "assets/starcloud_habitat_pod.glb", { height: 12, object: "Starcloud cylindrical habitat pod", scene: "Starcloud deck" });
+  group.add(house);
   habCollider(colliders, len, 12, 13, x, 6, z);
 }
 
 function addVilla(group, colliders, x, z, w, d, h) {
-  group.add(box(w, h, d, wallMat, x, h / 2, z));
-  group.add(box(w * 0.72, h * 0.62, 0.2, glowMat, x, h * 0.52, z - d / 2 - 0.1));
-  group.add(box(w + 3, 0.4, d + 3, mat.dark, x, 0.22, z));
+  const house = new THREE.Group();
+  house.position.set(x, 0, z);
+  house.add(box(w, h, d, wallMat, 0, h / 2, 0));
+  house.add(box(w * 0.72, h * 0.62, 0.2, glowMat, 0, h * 0.52, -d / 2 - 0.1));
+  house.add(box(w + 3, 0.4, d + 3, mat.dark, 0, 0.22, 0));
+  swapWithGLB(house, "assets/starcloud_habitat_villa.glb", { height: h, object: "Starcloud glass villa habitat", scene: "Starcloud deck" });
+  group.add(house);
   habCollider(colliders, w, h, d, x, h / 2, z);
 }
 
