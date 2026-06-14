@@ -27,7 +27,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | cinema.js | Parked cinematic title cards, crawl copy, hyperspace/projection transition timing |
 | constants.js | Shared scale constants, currently `R = 16` |
 | labels.js | Canvas sprite label system and label-tier typography |
-| materials.js | Shared colour palette, PBR material definitions, stars, texture loading |
+| materials.js | Shared colour palette, scene-wide PBR material library, stars, texture loading |
 | pbr.js | Procedural hard-surface PBR maps and per-scene PMREM environment maps |
 | greeble.js | Lightweight instanced panels, bolts, and vents for large bare surfaces |
 | primitives.js | Shared `box`, `cyl`, and `shadowAll` mesh helpers |

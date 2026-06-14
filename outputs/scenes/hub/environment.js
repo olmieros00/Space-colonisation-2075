@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { mat } from "../../core/materials.js";
 import { canvasTexture } from "./textures.js";
 
 function skyMaterial() {
@@ -70,9 +71,11 @@ export function configureDaylight(scene, state) {
 }
 
 export function addHorizonGround(scene) {
+  const horizonSand = mat.sand.clone();
+  horizonSand.map = makeSandTexture();
   const sand = new THREE.Mesh(
     new THREE.PlaneGeometry(1700, 1700),
-    new THREE.MeshStandardMaterial({ map: makeSandTexture(), color: 0xd0bc8f, roughness: 0.96 })
+    horizonSand
   );
   sand.rotation.x = -Math.PI / 2;
   sand.position.y = -0.08;
@@ -82,7 +85,7 @@ export function addHorizonGround(scene) {
 
   const water = new THREE.Mesh(
     new THREE.PlaneGeometry(1700, 420),
-    new THREE.MeshPhysicalMaterial({ color: 0x71a7bf, roughness: 0.24, metalness: 0, transparent: true, opacity: 0.68 })
+    mat.water
   );
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -0.065, 310);

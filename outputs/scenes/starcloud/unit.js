@@ -4,11 +4,11 @@ import { swapWithGLB } from "../../core/assets.js";
 import { mat } from "../../core/materials.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 
-const arrayMat = new THREE.MeshStandardMaterial({ color: 0x080c14, metalness: 0.42, roughness: 0.5 });
-const radiatorMat = new THREE.MeshStandardMaterial({ color: 0xdfe1dc, metalness: 0.18, roughness: 0.64 });
-const spineMat = new THREE.MeshStandardMaterial({ color: 0x5d6a76, metalness: 0.56, roughness: 0.42 });
-const containerMat = new THREE.MeshStandardMaterial({ color: 0xd8dbd5, metalness: 0.35, roughness: 0.48 });
-const glassMat = new THREE.MeshStandardMaterial({ color: 0x92cfff, emissive: 0x14324d, emissiveIntensity: 0.18, transparent: true, opacity: 0.34 });
+const arrayMat = mat.starcloudArray;
+const radiatorMat = mat.starcloudRadiator;
+const spineMat = mat.hullSteel;
+const containerMat = mat.computeContainer;
+const glassMat = mat.glassPanel;
 
 function unitCollider(colliders, w, h, d, x, y, z) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ visible: false }));
@@ -112,7 +112,7 @@ function addDataSpine(group, colliders) {
     minSize: 1.2,
     maxSize: 5.5,
     depth: 0.32
-  }, 360);
+  }, 520);
   unitCollider(colliders, 38, 34, 450, 0, 16, 0);
   addContainers(group, colliders);
 }

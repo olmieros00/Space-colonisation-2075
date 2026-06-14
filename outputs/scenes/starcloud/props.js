@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { swapWithGLB } from "../../core/assets.js";
-import { C, mat } from "../../core/materials.js";
+import { mat } from "../../core/materials.js";
 import { box, cyl } from "../../core/primitives.js";
 
-const droidMat = new THREE.MeshStandardMaterial({ color: 0x64707d, metalness: 0.45, roughness: 0.55 });
-const eyeMat = new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 1.4 });
+const droidMat = mat.hullSteel;
+const eyeMat = mat.emissiveAmber;
 
 function propCollider(colliders, w, h, d, x, y, z) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ visible: false }));

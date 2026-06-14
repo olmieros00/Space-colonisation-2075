@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { C, mat } from "../../core/materials.js";
+import { mat } from "../../core/materials.js";
 
 function satCanvasTexture(draw) {
   const canvas = document.createElement("canvas");
@@ -48,13 +48,18 @@ const solarMap = satCanvasTexture((ctx, w, h) => {
   }
 });
 
-const goldMli = new THREE.MeshStandardMaterial({ color: 0xc9a227, map: mliMap, metalness: 0.92, roughness: 0.34 });
-const carbon = new THREE.MeshStandardMaterial({ color: 0x111723, metalness: 0.3, roughness: 0.5 });
-const frame = new THREE.MeshStandardMaterial({ color: 0x7f8fa0, metalness: 0.78, roughness: 0.28 });
-const darkGlass = new THREE.MeshStandardMaterial({ color: 0x08111e, emissive: 0x10284a, emissiveIntensity: 0.3, metalness: 0.35, roughness: 0.24 });
-const solar = new THREE.MeshStandardMaterial({ color: 0x13284b, map: solarMap, emissive: 0x2f5694, emissiveIntensity: 0.48, metalness: 0.26, roughness: 0.38 });
-const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.22, roughness: 0.4 });
-const amberPrime = new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.85, metalness: 0.52, roughness: 0.26 });
+const goldMli = mat.goldMli.clone();
+goldMli.map = mliMap;
+const carbon = mat.carbonPanel;
+const frame = mat.hullSteel;
+const darkGlass = mat.sensorGlass.clone();
+darkGlass.emissive = new THREE.Color(0x10284a);
+darkGlass.emissiveIntensity = 0.3;
+const solar = mat.solar.clone();
+solar.map = solarMap;
+solar.emissiveIntensity = 0.48;
+const white = mat.whitePanel;
+const amberPrime = mat.amber;
 
 function satRounded(w, h, d, material, x = 0, y = 0, z = 0, radius = 0.018) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(w, h, d) * radius), material);
@@ -123,7 +128,7 @@ function addPayloadStack(parent, span, bodyZ, prime) {
 }
 
 function addPropulsion(parent, span, bodyX, bodyY, bodyZ) {
-  const thrusterMat = new THREE.MeshStandardMaterial({ color: 0x2a2f38, metalness: 0.86, roughness: 0.24 });
+  const thrusterMat = mat.darkMetal;
   for (const x of [-1, 1]) {
     for (const y of [-1, 1]) {
       const nozzle = satCylinder(span * 0.025, span * 0.012, span * 0.06, thrusterMat, 16);

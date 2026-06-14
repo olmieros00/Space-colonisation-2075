@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { mat } from "../../core/materials.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
 import { canvasTexture, makeLogoTexture } from "./textures.js";
 
@@ -93,9 +94,10 @@ function addDecals(group, radius) {
 export function buildRocket() {
   const group = new THREE.Group();
   const skin = makeRocketSkin();
-  const white = new THREE.MeshPhysicalMaterial({ map: skin, color: 0xf0f1ea, metalness: 0.12, roughness: 0.32, clearcoat: 0.42 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x101217, metalness: 0.5, roughness: 0.38 });
-  const metal = new THREE.MeshStandardMaterial({ color: 0x5d6870, metalness: 0.78, roughness: 0.28 });
+  const white = mat.rocketWhite.clone();
+  white.map = skin;
+  const black = mat.darkMetal;
+  const metal = mat.hullSteel;
   const radius = 0.92;
   group.add(cyl(radius, radius, 15.4, white, 128, 0, 8.0, 0));
   group.add(cyl(radius * 0.96, radius * 0.96, 6.2, white, 128, 0, 18.8, 0));

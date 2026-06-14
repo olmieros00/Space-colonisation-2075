@@ -3,9 +3,9 @@ import { swapWithGLB } from "../../core/assets.js";
 import { mat } from "../../core/materials.js";
 import { box, cyl } from "../../core/primitives.js";
 
-const deckMat = new THREE.MeshStandardMaterial({ color: 0x34424c, metalness: 0.42, roughness: 0.58 });
-const wallMat = new THREE.MeshStandardMaterial({ color: 0xdadbd2, metalness: 0.2, roughness: 0.44 });
-const glowMat = new THREE.MeshStandardMaterial({ color: 0x9fd3ff, emissive: 0x245477, emissiveIntensity: 0.22, transparent: true, opacity: 0.2 });
+const deckMat = mat.darkMetal;
+const wallMat = mat.computeContainer;
+const glowMat = mat.glassPanel;
 
 function habCollider(colliders, w, h, d, x, y, z) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshBasicMaterial({ visible: false }));

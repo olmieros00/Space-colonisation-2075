@@ -20,12 +20,36 @@ export const mat = {
   darkMetal: makePBR({ color: 0x11151b, metalness: 0.7, roughness: 0.42, normalScale: 0.95, repeat: 3 }),
   solar: makePBR({ color: 0x16294a, metalness: 0.55, roughness: 0.32, normalScale: 0.85, repeat: 4 }),
   copperFrame: makePBR({ color: 0x7a4a32, metalness: 0.78, roughness: 0.44, normalScale: 1.0, repeat: 3.2 }),
+  concrete: makePBR({ color: 0x777a74, metalness: 0.04, roughness: 0.82, normalScale: 0.88, repeat: 4 }),
+  scorched: makePBR({ color: 0x151210, metalness: 0.02, roughness: 0.95, normalScale: 0.9, repeat: 3 }),
+  facilityWhite: makePBR({ color: 0xdeddd4, metalness: 0.1, roughness: 0.42, normalScale: 0.82, repeat: 2.4 }),
+  sand: makePBR({ color: 0xb9a476, metalness: 0.0, roughness: 0.95, normalScale: 0.75, repeat: 5 }),
+  foliage: makePBR({ color: 0x48643a, metalness: 0.0, roughness: 0.9, normalScale: 0.55, repeat: 2 }),
+  rocketWhite: makePBR({ color: 0xf0f1ea, metalness: 0.16, roughness: 0.32, normalScale: 0.75, repeat: 2.2 }),
+  regolithPbr: makePBR({ color: 0x7f817d, metalness: 0.0, roughness: 0.94, normalScale: 0.95, repeat: 6 }),
+  moonPit: makePBR({ color: 0x4d4e4c, metalness: 0.0, roughness: 1.0, normalScale: 1.0, repeat: 4 }),
+  starcloudArray: makePBR({ color: 0x080c14, metalness: 0.5, roughness: 0.44, normalScale: 0.95, repeat: 5 }),
+  starcloudRadiator: makePBR({ color: 0xdfe1dc, metalness: 0.2, roughness: 0.62, normalScale: 0.85, repeat: 3 }),
+  computeContainer: makePBR({ color: 0xd8dbd5, metalness: 0.42, roughness: 0.44, normalScale: 0.95, repeat: 2.8 }),
+  goldMli: makePBR({ color: 0xc9a227, metalness: 0.92, roughness: 0.34, normalScale: 0.82, repeat: 2.6 }),
+  carbonPanel: makePBR({ color: 0x111723, metalness: 0.36, roughness: 0.5, normalScale: 0.82, repeat: 2.8 }),
+  sensorGlass: makePBR({ color: 0x08111e, metalness: 0.35, roughness: 0.24, normalScale: 0.55, repeat: 2 }),
+  droidMetal: makePBR({ color: 0x657481, metalness: 0.72, roughness: 0.56, normalScale: 0.75, repeat: 2.4 }),
+  wornMetal: makePBR({ color: 0x46586a, metalness: 0.55, roughness: 0.72, normalScale: 0.9, repeat: 2.6 }),
+  interiorWhite: makePBR({ color: 0xf1f1eb, metalness: 0.06, roughness: 0.24, normalScale: 0.55, repeat: 2 }),
+  interiorBlack: makePBR({ color: 0x050609, metalness: 0.3, roughness: 0.42, normalScale: 0.65, repeat: 2.4 }),
+  chairRed: makePBR({ color: 0xb8232f, metalness: 0.06, roughness: 0.3, normalScale: 0.52, repeat: 1.8 }),
   amber: new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 0.95, transparent: true, opacity: 0.82 }),
+  emissiveAmber: new THREE.MeshStandardMaterial({ color: C.amber, emissive: C.amber, emissiveIntensity: 1.35 }),
+  warningRed: new THREE.MeshStandardMaterial({ color: 0xff3355, emissive: 0xff1830, emissiveIntensity: 1.4 }),
   glass: new THREE.MeshPhysicalMaterial({ color: 0x7cc7ff, metalness: 0, roughness: 0.05, transmission: 0.45, transparent: true, opacity: 0.35 }),
   glassPanel: new THREE.MeshPhysicalMaterial({ color: 0x8ed4ff, metalness: 0.05, roughness: 0.08, transmission: 0.28, transparent: true, opacity: 0.42, envMapIntensity: 1.0 }),
-  regolith: new THREE.MeshStandardMaterial({ color: 0x7f817d, roughness: 0.92 }),
-  cream: new THREE.MeshStandardMaterial({ color: 0xded8c5, roughness: 0.65, metalness: 0.04 })
+  water: new THREE.MeshPhysicalMaterial({ color: 0x71a7bf, roughness: 0.24, metalness: 0, transparent: true, opacity: 0.68, envMapIntensity: 1.0 }),
+  regolith: null,
+  cream: null
 };
+mat.regolith = mat.regolithPbr;
+mat.cream = mat.interiorWhite;
 mat.amber.userData.baseEmissive = C.amber;
 mat.solar.emissive = new THREE.Color(0x2f5694);
 mat.solar.emissiveIntensity = 0.22;

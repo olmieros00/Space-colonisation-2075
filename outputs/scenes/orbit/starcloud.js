@@ -161,9 +161,9 @@ function buildComputeModule(R, bodyMat, darkMat, decalMat, trussMat, detail = fa
 }
 
 function addComputeSpine(root, detailRoot, R, interactive, focusStarcloud) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.5, roughness: 0.4 });
-  const darkMat = new THREE.MeshStandardMaterial({ color: 0x101218, metalness: 0.45, roughness: 0.5 });
-  const trussMat = mat.beskar;
+  const bodyMat = mat.computeContainer;
+  const darkMat = mat.darkMetal;
+  const trussMat = mat.hullSteel;
   const logoTex = makeStarcloudLogoTexture();
   const decalMat = new THREE.MeshBasicMaterial({ map: logoTex, transparent: true });
   const rows = [-0.032 * R, 0.032 * R];
@@ -196,7 +196,7 @@ function addComputeSpine(root, detailRoot, R, interactive, focusStarcloud) {
 }
 
 function addLaserTerminals(root, animatedBeams, R) {
-  const turretMat = new THREE.MeshStandardMaterial({ color: 0xb8c2cc, metalness: 0.68, roughness: 0.36 });
+  const turretMat = mat.hullSteel;
   const beamMat = new THREE.MeshBasicMaterial({ color: 0x9fd3ff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
   const mounts = [
     [-0.2 * R, 0.045 * R, -0.07 * R, -1.2, 0.35],
@@ -226,8 +226,8 @@ function addLaserTerminals(root, animatedBeams, R) {
 
 function addDragonCapsule(root, R) {
   const capsule = new THREE.Group();
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf1f1ec, metalness: 0.18, roughness: 0.38 });
-  const darkMat = new THREE.MeshStandardMaterial({ color: 0x11151b, metalness: 0.5, roughness: 0.5 });
+  const bodyMat = mat.whitePanel;
+  const darkMat = mat.darkMetal;
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.028 * R, 0.038 * R, 12, 32), bodyMat);
   body.scale.set(1.12, 0.82, 1.12);
   const nose = new THREE.Mesh(new THREE.ConeGeometry(0.03 * R, 0.04 * R, 32), bodyMat);
@@ -255,8 +255,8 @@ function addDragonCapsule(root, R) {
 }
 
 function addHumanScaleMarkers(root) {
-  const suitMat = new THREE.MeshStandardMaterial({ color: 0xd8d9d4, metalness: 0.12, roughness: 0.58 });
-  const visorMat = new THREE.MeshStandardMaterial({ color: 0x101218, metalness: 0.35, roughness: 0.28 });
+  const suitMat = mat.whitePanel;
+  const visorMat = mat.darkMetal;
   const placements = [
     [-3.15, 0.058, -0.58], [-2.35, 0.058, 0.55], [-1.65, 0.058, -0.62], [-0.9, 0.058, 0.58],
     [-0.25, 0.058, -0.54], [0.52, 0.058, 0.62], [1.22, 0.058, -0.58], [2.05, 0.058, 0.54],
@@ -277,10 +277,10 @@ function addHumanScaleMarkers(root) {
 }
 
 function addHabitationMassing(root, R) {
-  const shellMat = new THREE.MeshStandardMaterial({ color: 0x6f8292, metalness: 0.58, roughness: 0.42 });
-  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x08111b, metalness: 0.05, roughness: 0.08, transparent: true, opacity: 0.72 });
-  const solarMat = new THREE.MeshStandardMaterial({ color: 0x0a0e16, metalness: 0.42, roughness: 0.36 });
-  const connectorMat = mat.beskar;
+  const shellMat = mat.hullSteel;
+  const glassMat = mat.glassPanel;
+  const solarMat = mat.starcloudArray;
+  const connectorMat = mat.hullSteel;
   const podPositions = [
     [-2.65, 0.86, -1.22, "villa", 0.16],
     [-1.72, 0.92, 1.18, "dome", -0.2],
@@ -336,12 +336,12 @@ function addRakingInspectionLight(group) {
 
 function makeDroidMaterials() {
   return {
-    metal: new THREE.MeshStandardMaterial({ color: 0x657481, metalness: 0.72, roughness: 0.56 }),
-    worn: new THREE.MeshStandardMaterial({ color: 0x46586a, metalness: 0.55, roughness: 0.72 }),
-    rust: new THREE.MeshStandardMaterial({ color: 0x7a4a32, metalness: 0.45, roughness: 0.7 }),
-    dark: new THREE.MeshStandardMaterial({ color: 0x11151b, metalness: 0.6, roughness: 0.5 }),
-    eye: new THREE.MeshStandardMaterial({ color: 0xff9a3c, emissive: 0xff9a3c, emissiveIntensity: 1.8 }),
-    red: new THREE.MeshStandardMaterial({ color: 0xff3355, emissive: 0xff1830, emissiveIntensity: 1.4 }),
+    metal: mat.droidMetal,
+    worn: mat.wornMetal,
+    rust: mat.copperFrame,
+    dark: mat.darkMetal,
+    eye: mat.emissiveAmber,
+    red: mat.warningRed,
     spark: new THREE.MeshBasicMaterial({ color: 0x9fd3ff, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending })
   };
 }
@@ -494,8 +494,8 @@ function technicianDroid(R, i, mats) {
 
 function buildProxyDroids(parent, R) {
   const droids = new THREE.Group();
-  const metal = new THREE.MeshStandardMaterial({ color: 0x536270, metalness: 0.55, roughness: 0.65 });
-  const lamp = new THREE.MeshStandardMaterial({ color: 0xff9a3c, emissive: 0xff9a3c, emissiveIntensity: 1.2 });
+  const metal = mat.droidMetal;
+  const lamp = mat.emissiveAmber;
   const u = 0.008;
   for (let i = 0; i < 12; i++) {
     const droid = new THREE.Group();
@@ -545,19 +545,14 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
     inspectionLocalTarget: new THREE.Vector3(0.82, 0.34, 0.02)
   });
   const solarTex = makeSolarCellTexture();
-  const arrayMat = new THREE.MeshPhysicalMaterial({
-    map: solarTex,
-    color: 0x0a0e16,
-    metalness: 0.4,
-    roughness: 0.35,
-    emissive: 0x111a35,
-    emissiveIntensity: 0.18,
-    clearcoat: 0.45,
-    clearcoatRoughness: 0.22
-  });
-  const trussMat = mat.beskar;
-  const amberMat = new THREE.MeshStandardMaterial({ color: 0xff9a3c, emissive: 0xff9a3c, emissiveIntensity: 1.35, metalness: 0.25, roughness: 0.35 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.95, roughness: 0.28, side: THREE.DoubleSide });
+  const arrayMat = mat.starcloudArray.clone();
+  arrayMat.map = solarTex;
+  arrayMat.emissive = new THREE.Color(0x111a35);
+  arrayMat.emissiveIntensity = 0.18;
+  const trussMat = mat.hullSteel;
+  const amberMat = mat.amber;
+  const goldMat = mat.goldMli.clone();
+  goldMat.side = THREE.DoubleSide;
   const animatedBeams = [];
 
   addTrussSpine(root, R, trussMat, amberMat, goldMat);
@@ -573,7 +568,7 @@ export function buildStarcloud(scene, R, interactive, animated, focusOnObject, c
   addRakingInspectionLight(root);
   addInteractive(interactive, root, "Starcloud Atlas", focusStarcloud, "A ~50GW orbital data haven watched by service droids and laser uplinks");
 
-  const radiatorMat = new THREE.MeshStandardMaterial({ color: 0xd8d9d4, metalness: 0.12, roughness: 0.66 });
+  const radiatorMat = mat.starcloudRadiator;
   for (const z of [-0.13 * R, 0.13 * R]) {
     const radiator = new THREE.Mesh(new THREE.BoxGeometry(0.18 * R, 0.006 * R, 0.055 * R), radiatorMat);
     radiator.position.set(0.19 * R, -0.055 * R, z);

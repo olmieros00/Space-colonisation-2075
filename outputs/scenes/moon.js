@@ -33,18 +33,18 @@ export function buildMoon(scene, camera, camState, interactive, animated, UI, tr
   flare.scale.set(4, 0.22, 0.22);
   scene.add(flare);
 
-  const pit = new THREE.Mesh(new THREE.CylinderGeometry(10, 13, 1.1, 64), new THREE.MeshStandardMaterial({ color: 0x4d4e4c, roughness: 1 }));
+  const pit = new THREE.Mesh(new THREE.CylinderGeometry(10, 13, 1.1, 64), mat.moonPit);
   pit.position.set(10, -0.55, -12);
   scene.add(pit);
   const dome = new THREE.Mesh(new THREE.SphereGeometry(5.8, 48, 20, 0, Math.PI * 2, 0, Math.PI / 2), mat.cream);
   dome.scale.set(1.35, 0.62, 1);
   dome.position.set(10, 0.12, -12);
   scene.add(dome);
-  const module = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, 4.3, 28), mat.white);
+  const module = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.55, 4.3, 28), mat.whitePanel);
   module.rotation.z = Math.PI / 2;
   module.position.set(18.5, 1.15, -10.7);
   scene.add(module);
-  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 5.2, 24), mat.beskar);
+  const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 5.2, 24), mat.hullSteel);
   tube.rotation.z = Math.PI / 2;
   tube.position.set(15, 0.92, -11.3);
   scene.add(tube);

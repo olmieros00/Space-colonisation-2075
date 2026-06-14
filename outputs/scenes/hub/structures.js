@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { addInteractive } from "../../core/materials.js";
+import { addInteractive, mat } from "../../core/materials.js";
 import { greeble } from "../../core/greeble.js";
 import { label } from "../../core/labels.js";
 import { box, cyl, shadowAll } from "../../core/primitives.js";
@@ -8,9 +8,9 @@ import { makeConcreteTexture, makeLogoTexture, makeSolarTexture } from "./textur
 import { buildRocket } from "./rocket.js";
 
 export function buildPad(scene, interactive, travel) {
-  const concrete = new THREE.MeshStandardMaterial({ color: 0x777a74, roughness: 0.82, metalness: 0.03 });
-  const scorch = new THREE.MeshStandardMaterial({ color: 0x151210, roughness: 0.95 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0x606a73, metalness: 0.72, roughness: 0.36 });
+  const concrete = mat.concrete;
+  const scorch = mat.scorched;
+  const steel = mat.hullSteel;
   const pad = cyl(9.3, 10.4, 0.72, concrete, 8, -24, 0.36, -2);
   addInteractive(interactive, pad, "First Light Launchway", () => travel("orbit"), "Begin the climb from home soil to the Guardian Net");
   scene.add(pad);
@@ -34,11 +34,9 @@ export function buildPad(scene, interactive, travel) {
 }
 
 export function addLatticeTower(group, height, width, material, tiers = 12) {
-  const legGeo = new THREE.BoxGeometry(0.18, height, 0.18);
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
-      const leg = new THREE.Mesh(legGeo, material);
-      leg.position.set(sx * width * 0.5, height * 0.5, sz * width * 0.5);
+      const leg = box(0.18, height, 0.18, material, sx * width * 0.5, height * 0.5, sz * width * 0.5);
       group.add(leg);
     }
   }
@@ -62,7 +60,7 @@ export function addLatticeTower(group, height, width, material, tiers = 12) {
 }
 
 export function buildTowers(scene) {
-  const steel = new THREE.MeshStandardMaterial({ color: 0x6d7882, metalness: 0.74, roughness: 0.34 });
+  const steel = mat.hullSteel;
   const mech = new THREE.Group();
   addLatticeTower(mech, 23, 2.6, steel, 11);
   const deck = box(4.4, 0.45, 3.3, steel, 0, 18.4, 0);
@@ -108,9 +106,9 @@ export function buildTowers(scene) {
 }
 
 export function buildFacility(scene, interactive) {
-  const wall = new THREE.MeshPhysicalMaterial({ color: 0xdeddd4, metalness: 0.08, roughness: 0.44, clearcoat: 0.18 });
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0x1e3548, metalness: 0.05, roughness: 0.08, transmission: 0.18, transparent: true, opacity: 0.72 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x202830, metalness: 0.35, roughness: 0.45 });
+  const wall = mat.facilityWhite;
+  const glass = mat.glassPanel;
+  const dark = mat.darkMetal;
   const building = new THREE.Group();
   building.add(box(42, 6.2, 10, wall, 0, 3.1, 0));
   building.add(box(43.5, 0.18, 10.4, dark, 0, 2.35, 5.08));
@@ -126,7 +124,8 @@ export function buildFacility(scene, interactive) {
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(8.8, 1.0), new THREE.MeshBasicMaterial({ map: makeLogoTexture("FIRST LIGHT"), transparent: true }));
   sign.position.set(12.2, 4.75, 5.37);
   building.add(sign);
-  const solarMat = new THREE.MeshStandardMaterial({ map: makeSolarTexture(), color: 0x233f6a, emissive: 0x081326, emissiveIntensity: 0.12, metalness: 0.35, roughness: 0.42 });
+  const solarMat = mat.solar.clone();
+  solarMat.map = makeSolarTexture();
   for (let i = -4; i <= 4; i++) {
     const panel = box(3.0, 0.08, 2.2, solarMat, i * 3.3, 6.45, -1.3);
     panel.rotation.x = -0.08;
@@ -164,15 +163,15 @@ export function buildDisplayBooster(scene) {
   booster.position.set(29, 0.18, -37);
   booster.rotation.y = -0.2;
   scene.add(booster);
-  const plinth = box(5.2, 0.35, 5.2, new THREE.MeshStandardMaterial({ color: 0x73766f, roughness: 0.8 }), 29, 0.18, -37);
+  const plinth = box(5.2, 0.35, 5.2, mat.concrete, 29, 0.18, -37);
   scene.add(plinth);
   label(scene, "HERITAGE BOOSTER", new THREE.Vector3(29, 9.8, -40.5), 0.42, "subsystem");
 }
 
 export function buildProps(scene) {
-  const white = new THREE.MeshStandardMaterial({ color: 0xe8e8e0, metalness: 0.22, roughness: 0.42 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0x7a858d, metalness: 0.72, roughness: 0.35 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1a1d24, metalness: 0.35, roughness: 0.5 });
+  const white = mat.whitePanel;
+  const steel = mat.hullSteel;
+  const dark = mat.darkMetal;
   for (let i = 0; i < 7; i++) {
     const tank = i % 2
       ? cyl(1.25, 1.25, 5.5, white, 32, 38 + i * 2.8, 2.75, -11)
@@ -199,7 +198,7 @@ export function buildProps(scene) {
   for (let i = 0; i < 32; i++) {
     const shrub = new THREE.Group();
     const trunk = cyl(0.07, 0.11, 0.8 + Math.random() * 0.8, dark, 6);
-    const leaves = new THREE.Mesh(new THREE.ConeGeometry(0.55 + Math.random() * 0.5, 1.0 + Math.random() * 1.1, 7), new THREE.MeshStandardMaterial({ color: 0x48643a, roughness: 0.9 }));
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(0.55 + Math.random() * 0.5, 1.0 + Math.random() * 1.1, 7), mat.foliage);
     leaves.position.y = trunk.geometry.parameters.height + 0.45;
     shrub.add(trunk, leaves);
     shrub.position.set(THREE.MathUtils.randFloat(-68, 62), 0, THREE.MathUtils.randFloat(-58, -45));
@@ -216,25 +215,26 @@ export function buildProps(scene) {
 }
 
 export function buildGround(scene) {
-  const concrete = new THREE.MeshStandardMaterial({ map: makeConcreteTexture(), color: 0xd0cec3, roughness: 0.92, metalness: 0.02 });
+  const concrete = mat.concrete.clone();
+  concrete.map = makeConcreteTexture();
   const apron = new THREE.Mesh(new THREE.PlaneGeometry(150, 112), concrete);
   apron.rotation.x = -Math.PI / 2;
   apron.receiveShadow = true;
   scene.add(apron);
 
-  const sand = new THREE.Mesh(new THREE.PlaneGeometry(230, 190), new THREE.MeshStandardMaterial({ color: 0xb9a476, roughness: 0.95 }));
+  const sand = new THREE.Mesh(new THREE.PlaneGeometry(230, 190), mat.sand);
   sand.rotation.x = -Math.PI / 2;
   sand.position.y = -0.04;
   sand.receiveShadow = true;
   scene.add(sand);
   sand.renderOrder = -1;
 
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(230, 42), new THREE.MeshPhysicalMaterial({ color: 0x4d8eaa, roughness: 0.12, metalness: 0.02, transparent: true, opacity: 0.72 }));
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(230, 42), mat.water);
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -0.025, 65);
   scene.add(water);
 
-  const fenceMat = new THREE.MeshStandardMaterial({ color: 0x59616b, metalness: 0.6, roughness: 0.55 });
+  const fenceMat = mat.hullSteel;
   for (let i = -72; i <= 72; i += 4) {
     scene.add(box(0.08, 1.45, 0.08, fenceMat, i, 0.72, -42));
   }

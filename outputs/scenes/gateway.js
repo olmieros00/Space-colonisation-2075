@@ -19,10 +19,10 @@ function addSealedShell(scene) {
   );
   hull.position.set(0, 2.9, -13.8);
   scene.add(hull);
-  scene.add(box(15, 0.12, 45, mat.white, 0, -0.1, -13.8));
-  scene.add(box(15, 0.12, 45, mat.white, 0, 5.82, -13.8));
-  scene.add(box(0.16, 6.0, 45, mat.white, -7.35, 2.8, -13.8));
-  scene.add(box(0.16, 6.0, 45, mat.white, 7.35, 2.8, -13.8));
+  scene.add(box(15, 0.12, 45, mat.interiorWhite, 0, -0.1, -13.8));
+  scene.add(box(15, 0.12, 45, mat.interiorWhite, 0, 5.82, -13.8));
+  scene.add(box(0.16, 6.0, 45, mat.interiorWhite, -7.35, 2.8, -13.8));
+  scene.add(box(0.16, 6.0, 45, mat.interiorWhite, 7.35, 2.8, -13.8));
 }
 
 function makeLineTexture() {
@@ -92,10 +92,10 @@ function addLightbox(scene, x, y, z, w, h, rotX = 0, rotY = 0) {
 }
 
 function addReceptionLounge(scene) {
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf4f3ec, metalness: 0.04, roughness: 0.18, clearcoat: 0.5 });
-  const mirror = new THREE.MeshPhysicalMaterial({ color: 0xf2f4f4, metalness: 0.25, roughness: 0.12, clearcoat: 0.7 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.22, roughness: 0.36 });
-  const red = new THREE.MeshPhysicalMaterial({ color: 0xb8232f, metalness: 0.04, roughness: 0.3, clearcoat: 0.35 });
+  const white = mat.interiorWhite;
+  const mirror = mat.whitePanel;
+  const black = mat.interiorBlack;
+  const red = mat.chairRed;
   const floor = box(14, 0.14, 10, white, 0, -0.04, 4.8);
   scene.add(floor);
   for (let x = -6; x <= 6; x += 3) scene.add(box(0.035, 0.012, 10.1, black, x, 0.05, 4.8));
@@ -140,9 +140,9 @@ function addReceptionLounge(scene) {
 }
 
 function addCurvedCorridor(scene) {
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf2f2ea, metalness: 0.04, roughness: 0.23, clearcoat: 0.35 });
+  const white = mat.interiorWhite;
   const glass = new THREE.MeshBasicMaterial({ color: 0x57d8ff, transparent: true, opacity: 0.78 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.3, roughness: 0.45 });
+  const dark = mat.interiorBlack;
   for (let i = 0; i < 18; i++) {
     const p = i / 17;
     const angle = p * Math.PI * 0.58;
@@ -175,9 +175,9 @@ function addCurvedCorridor(scene) {
 }
 
 function addOctagonalTunnel(scene) {
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf1f1eb, metalness: 0.04, roughness: 0.24, clearcoat: 0.38 });
-  const blackFloor = new THREE.MeshStandardMaterial({ map: makeLineTexture(), color: 0xffffff, metalness: 0.2, roughness: 0.35 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.28, roughness: 0.42 });
+  const white = mat.interiorWhite;
+  const blackFloor = Object.assign(mat.interiorBlack.clone(), { map: makeLineTexture() });
+  const black = mat.interiorBlack;
   const radius = 3.05;
   const length = 9.5;
   const centerZ = -17.2;
@@ -202,9 +202,9 @@ function addOctagonalTunnel(scene) {
 }
 
 function addPaddedSection(scene) {
-  const padMat = new THREE.MeshStandardMaterial({ map: makePanelTexture(), color: 0xffffff, roughness: 0.64, metalness: 0.02 });
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf1f1eb, metalness: 0.04, roughness: 0.26, clearcoat: 0.34 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.28, roughness: 0.42 });
+  const padMat = Object.assign(mat.interiorWhite.clone(), { map: makePanelTexture() });
+  const white = mat.interiorWhite;
+  const dark = mat.interiorBlack;
   const centerZ = -25.2;
   scene.add(box(5.7, 0.12, 6.2, dark, 0, 0.03, centerZ));
   for (const side of [-1, 1]) {
@@ -221,7 +221,7 @@ function addPaddedSection(scene) {
 
 function addMoonHologram(scene, interactive, animated, assets) {
   const table = new THREE.Group();
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf1f1eb, metalness: 0.04, roughness: 0.25, clearcoat: 0.4 });
+  const white = mat.interiorWhite;
   const glass = new THREE.MeshBasicMaterial({ color: 0x6fd8ff, transparent: true, opacity: 0.18 });
   table.add(cyl(0.18, 0.18, 1.0, white, 24, 0, 0, 0));
   const top = cyl(1.55, 1.55, 0.10, white, 48, 0, 0, 0);
@@ -247,8 +247,8 @@ function addMoonHologram(scene, interactive, animated, assets) {
 }
 
 function addShuttleDock(scene, interactive, travel) {
-  const white = new THREE.MeshPhysicalMaterial({ color: 0xf1f1eb, metalness: 0.12, roughness: 0.32, clearcoat: 0.36 });
-  const black = new THREE.MeshStandardMaterial({ color: 0x050609, metalness: 0.35, roughness: 0.42 });
+  const white = mat.interiorWhite;
+  const black = mat.interiorBlack;
   const bay = new THREE.Group();
   bay.add(box(9.8, 4.8, 0.22, white, 0, 2.4, -34.2));
   bay.add(box(0.22, 4.8, 8.5, white, -4.9, 2.4, -30.1));
