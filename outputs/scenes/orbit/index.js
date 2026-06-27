@@ -3,7 +3,7 @@ import { addLights, makeStars } from "../../core/materials.js";
 import { applyHDRIEnvironment } from "../../core/assets.js";
 import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
-import { buildConstellation } from "./constellation.js";
+import { buildConstellation } from "./constellation.js?v=guardian-sats-hidden-2";
 import { buildEarth, moonMesh } from "./earth.js";
 import { buildSolarSystem } from "./solarsystem.js";
 import { buildStarcloud } from "./starcloud.js";
