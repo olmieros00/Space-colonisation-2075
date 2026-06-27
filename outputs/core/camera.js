@@ -118,7 +118,7 @@ export function focusEarth(UI, R) {
   camState.inspectionRoot = null;
   camState.focusExitDistance = 0;
   camState.orbitMin = 1.02 * R;
-  camState.orbitMax = 6 * R;
+  camState.orbitMax = 72 * R;
   camState.focusTarget.set(0, 0, 0);
   camState.focusDistance = 2.6 * R;
   camState.focusTween = {
