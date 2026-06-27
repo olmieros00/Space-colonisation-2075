@@ -10,12 +10,14 @@ import { buildStarcloud } from "./starcloud.js";
 import { buildStation } from "./station.js";
 import { buildSatelliteSwarm } from "./swarm.js";
 
+const SHOW_ORBIT_STRUCTURES = false;
+
 export function buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, travel, state, focusOnObject) {
   makeStars(scene);
   state.mode = "orbit";
   UI.location.textContent = "EARTH ORBIT // GUARDIAN NET";
   UI.returnBtn.style.display = "block";
-  UI.hint.textContent = "Orbit the blue homeworld. Hover Guardian Prime or Starcloud Atlas. Click a landmark to move closer.";
+  UI.hint.textContent = "Earth appearance edit mode. Orbit the blue homeworld without orbital structures in view.";
   addLights(scene, state);
   applyHDRIEnvironment(scene, "space", () => makeEnv(scene, state.renderer, "space"));
   buildSolarSystem(scene, state);
@@ -31,9 +33,11 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
 
   buildConstellation(scene, R, interactive, animated, satellites, focusOnObject);
   buildSatelliteSwarm(scene, R, animated, camState);
-  buildStation(scene, R, interactive, animated, travel);
-  const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject, camState);
-  scene.add(starcloud);
+  if (SHOW_ORBIT_STRUCTURES) {
+    buildStation(scene, R, interactive, animated, travel);
+    const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject, camState);
+    scene.add(starcloud);
+  }
 
   setOrbit(new THREE.Vector3(0, 0, 0), 2.6 * R, 1.02 * R, 6 * R, 0.18, 0.3);
 }
