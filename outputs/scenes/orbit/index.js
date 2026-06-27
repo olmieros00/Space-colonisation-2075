@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { addLights, makeStars } from "../../core/materials.js";
+import { addInteractive, addLights, makeStars } from "../../core/materials.js";
 import { applyHDRIEnvironment } from "../../core/assets.js";
 import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
@@ -26,8 +26,14 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   scene.fog = null;
   buildEarth(scene, R, animated, state);
 
-  const moon = moonMesh(0.27 * R);
-  moon.position.set(-4.5 * R, 0.4 * R, -4 * R);
+  const moon = moonMesh(0.52 * R);
+  moon.position.set(-2.95 * R, 0.55 * R, -2.42 * R);
+  moon.name = "Orbital Moon";
+  addInteractive(interactive, moon, "The Moon", () => focusOnObject(moon, 1.25 * R, {
+    orbitMin: 0.62 * R,
+    orbitMax: 4.2 * R,
+    exitDistance: 2.6 * R
+  }), "Inspect the lunar surface from Earth orbit");
   scene.add(moon);
   const moonLight = new THREE.PointLight(0xd0d8e8, 0.4, 120);
   moonLight.position.copy(moon.position);
