@@ -4,7 +4,7 @@ import { applyHDRIEnvironment } from "../../core/assets.js";
 import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
 import { buildConstellation } from "./constellation.js?v=guardian-sats-hidden-2";
-import { buildEarth, moonMesh } from "./earth.js?v=moon-surface-detail-1";
+import { buildEarth, moonMesh } from "./earth.js?v=real-moon-texture-1";
 import { buildSolarSystem } from "./solarsystem.js";
 import { buildStarcloud } from "./starcloud.js";
 import { buildStation } from "./station.js";

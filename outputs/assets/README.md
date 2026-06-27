@@ -15,6 +15,7 @@ Use uncompressed `.glb` where possible. Use `+Y` up, object centered on X/Z, wit
 | `droid.glb` | Maintenance/service droids | Orbit Starcloud inspection + Starcloud deck | Orbit: auto-fit to `0.04R-0.052R`; Starcloud: auto-fit to `~2m` |
 | `figure.glb` | Human suited scale figures | Orbit Starcloud inspection + Starcloud deck | Orbit: auto-fit to `0.042` scene units; Starcloud: auto-fit to `1.8m` |
 | `dragon_capsule.glb` | Dragon-like servicing capsule / lunar shuttle proxy | Orbit Starcloud + Gateway shuttle dock + Starcloud unit dock | Orbit: auto-fit to `0.13R`; Gateway: auto-fit to `2.0` scene units; Starcloud: auto-fit to `12m` |
+| `moon_2k_real.jpg` | Real lunar albedo and subtle bump source | Orbit Moon focus + Gateway hologram | 2048x1024 equirectangular texture from Solar System Scope |
 | `gateway_chair.glb` | Reception lounge red molded chairs | Gateway interior | Auto-fit to `0.95` scene units tall; centered at chair origin |
 | `gateway_desk.glb` | Reception desk | Gateway interior | Auto-fit to `1.15` scene units tall; centered on desk origin |
 | `starcloud_habitat_dome.glb` | Geodesic / dome lunar houses | Starcloud first-person scene | Local scale `1 unit = 1m`; auto-fit to `8-10m` depending placement |
