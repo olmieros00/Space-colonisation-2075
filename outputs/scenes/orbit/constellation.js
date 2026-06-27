@@ -1,6 +1,5 @@
 import * as THREE from "three";
-import { C, addInteractive } from "../../core/materials.js";
-import { buildSatelliteModel } from "./satelliteModel.js";
+import { C } from "../../core/materials.js";
 
 const PLANE_COUNT = 6;
 const SATELLITES_PER_PLANE = 8;
@@ -32,8 +31,7 @@ function addPlaneGuideRing(scene, radius, planeNormal) {
 }
 
 function satellite(scene, R, interactive, satellites, focusOnObject, name, radius, speed, phase, prime = false, plane = 0, index = 0, planeNormal = ORBIT_NORMAL_BASE) {
-  const g = buildSatelliteModel(R, prime);
-  const primaryBody = g.userData.primaryBody;
+  const g = new THREE.Object3D();
   Object.assign(g.userData, {
     radius,
     speed,
@@ -45,12 +43,7 @@ function satellite(scene, R, interactive, satellites, focusOnObject, name, radiu
     ascendingNode: plane * (Math.PI * 2 / PLANE_COUNT),
     orbitalNormal: planeNormal.clone()
   });
-  if (prime) {
-    g.userData.focusable = true;
-    addInteractive(interactive, primaryBody, name, () => focusOnObject(g), "The first bright node of the Guardian Net");
-  }
   satellites.push(g);
-  scene.add(g);
   return g;
 }
 
