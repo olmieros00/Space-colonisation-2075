@@ -13,6 +13,8 @@ import { buildSatelliteSwarm } from "./swarm.js";
 const SHOW_ORBIT_STRUCTURES = false;
 
 export function buildOrbit(scene, R, camera, camState, interactive, animated, satellites, UI, travel, state, focusOnObject) {
+  state.renderer.setClearColor(0x000000, 1);
+  scene.background = new THREE.Color(0x000000);
   makeStars(scene);
   state.mode = "orbit";
   UI.location.textContent = "EARTH ORBIT // GUARDIAN NET";

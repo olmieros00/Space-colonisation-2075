@@ -135,10 +135,10 @@ function envCanvas(type) {
   cnv.height = 256;
   const ctx = cnv.getContext("2d");
   const sets = {
-    space: ["#02040a", "#0b1424", "#02040a"],
+    space: ["#000000", "#010103", "#000000"],
     day: ["#2f8fd8", "#d9edf8", "#d8bd86"],
     interior: ["#f4f3ec", "#ffffff", "#d8d8d2"]
-  }[type] || ["#05070b", "#1a1d24", "#05070b"];
+  }[type] || ["#000000", "#050609", "#000000"];
   const grad = ctx.createLinearGradient(0, 0, 0, cnv.height);
   grad.addColorStop(0, sets[0]);
   grad.addColorStop(0.52, sets[1]);

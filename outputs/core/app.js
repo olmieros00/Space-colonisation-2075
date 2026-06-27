@@ -25,7 +25,7 @@ if (!UI.inspectBtn) UI.inspectBtn = document.getElementById("inspectBtn");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0x05070b, 1);
+renderer.setClearColor(0x000000, 1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.25;
@@ -114,8 +114,8 @@ function resetScene() {
   state.scene = scene;
   renderPass.scene = scene;
   if (state.ssaoPass) state.ssaoPass.scene = scene;
-  scene.fog = new THREE.FogExp2(0x05070b, 0.016);
-  renderer.setClearColor(0x05070b, 1);
+  scene.fog = new THREE.FogExp2(0x000000, 0.016);
+  renderer.setClearColor(0x000000, 1);
   renderer.toneMappingExposure = 1.25;
 }
 
