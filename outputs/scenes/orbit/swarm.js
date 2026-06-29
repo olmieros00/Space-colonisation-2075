@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { addInteractive } from "../../core/materials.js";
 import { swarmFragmentShader, swarmVertexShader } from "../../shaders/swarm.glsl.js";
 
 // Thousands of GPU dots stand in for the much larger 2027+ traffic vision,
@@ -8,7 +9,19 @@ const LANE_COUNT = 90;
 const LANE_SEGMENTS = 144;
 const TWO_PI = Math.PI * 2;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-const MEAN_ORBIT_PERIOD = 240;
+const MEAN_ORBIT_PERIOD = 5400;
+const HIGHWAY_FOCUS_COUNT = 8;
+const HIGHWAY_SEGMENT_COUNT = 96;
+const HIGHWAY_SATELLITE_COUNT = 9;
+const panelAxis = new THREE.Vector3();
+const wingAxis = new THREE.Vector3();
+const normalAxis = new THREE.Vector3();
+const tempPoint = new THREE.Vector3();
+const tempNext = new THREE.Vector3();
+const baseTorusNormal = new THREE.Vector3(0, 0, 1);
+const tmpRadial = new THREE.Vector3();
+const tmpTangent = new THREE.Vector3();
+const tmpCross = new THREE.Vector3();
 
 function swarmRand(seed) {
   return THREE.MathUtils.euclideanModulo(Math.sin(seed * 127.1) * 43758.5453, 1);
@@ -43,6 +56,19 @@ function orbitPoint(lane, theta) {
   p.applyAxisAngle(new THREE.Vector3(1, 0, 0), lane.inclination);
   p.applyAxisAngle(new THREE.Vector3(0, 1, 0), lane.node);
   return p;
+}
+
+function laneTangent(lane, theta) {
+  const a = orbitPoint(lane, theta + 0.004);
+  const b = orbitPoint(lane, theta - 0.004);
+  return a.sub(b).normalize();
+}
+
+function laneNormal(lane) {
+  return new THREE.Vector3(0, 1, 0)
+    .applyAxisAngle(new THREE.Vector3(1, 0, 0), lane.inclination)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), lane.node)
+    .normalize();
 }
 
 function createLanes(R) {
@@ -116,7 +142,276 @@ function createLaneGuides(R, lanes) {
   return guides;
 }
 
-export function buildSatelliteSwarm(scene, R, animated, camState) {
+function makeHighwayMaterial({ color = 0xaefaff, opacity = 1, depthWrite = false } = {}) {
+  return new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity,
+    depthWrite,
+    depthTest: true,
+    blending: THREE.AdditiveBlending
+  });
+}
+
+function setHighwayOpacity(root, opacity) {
+  root.traverse(o => {
+    if (o.material && o.material.userData.highwayOpacity !== undefined) {
+      o.material.opacity = o.material.userData.highwayOpacity * opacity;
+    }
+  });
+}
+
+function orientToLane(obj, lane, theta, roll = 0) {
+  const radial = orbitPoint(lane, theta).normalize();
+  const tangent = laneTangent(lane, theta);
+  normalAxis.crossVectors(tangent, radial).normalize();
+  wingAxis.crossVectors(normalAxis, tangent).normalize();
+  panelAxis.copy(wingAxis).applyAxisAngle(tangent, roll);
+  const m = new THREE.Matrix4().makeBasis(tangent, panelAxis, normalAxis);
+  obj.quaternion.setFromRotationMatrix(m);
+}
+
+function addPanelGrid(panel, width, height, material) {
+  const lines = [];
+  const cols = 5;
+  const rows = 3;
+  for (let i = 1; i < cols; i++) {
+    const x = THREE.MathUtils.lerp(-width / 2, width / 2, i / cols);
+    lines.push(x, -height / 2, 0.004, x, height / 2, 0.004);
+  }
+  for (let i = 1; i < rows; i++) {
+    const y = THREE.MathUtils.lerp(-height / 2, height / 2, i / rows);
+    lines.push(-width / 2, y, 0.004, width / 2, y, 0.004);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(lines, 3));
+  panel.add(new THREE.LineSegments(geo, material));
+}
+
+function makeAtmosphereHazeTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  g.addColorStop(0, "rgba(170,220,255,0.00)");
+  g.addColorStop(0.22, "rgba(132,203,255,0.22)");
+  g.addColorStop(0.48, "rgba(70,160,230,0.36)");
+  g.addColorStop(0.7, "rgba(20,76,140,0.20)");
+  g.addColorStop(1, "rgba(2,8,22,0.00)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const horizon = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  horizon.addColorStop(0, "rgba(180,235,255,0.00)");
+  horizon.addColorStop(0.5, "rgba(230,250,255,0.62)");
+  horizon.addColorStop(1, "rgba(180,235,255,0.00)");
+  ctx.fillStyle = horizon;
+  ctx.fillRect(0, canvas.height * 0.43, canvas.width, 4);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createOrbitAtmosphereLayer(R) {
+  const root = new THREE.Group();
+  root.name = "Low-orbit atmospheric highway haze";
+  const hazeMat = new THREE.MeshBasicMaterial({
+    map: makeAtmosphereHazeTexture(),
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    depthTest: true,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  hazeMat.userData.highwayOpacity = 0.55;
+  const haze = new THREE.Mesh(new THREE.PlaneGeometry(2.8 * R, 1.05 * R), hazeMat);
+  haze.name = "Low-orbit blue atmospheric limb";
+  root.add(haze);
+
+  const washMat = new THREE.MeshBasicMaterial({
+    color: 0x8fcaff,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    depthTest: true,
+    blending: THREE.AdditiveBlending
+  });
+  washMat.userData.highwayOpacity = 0.09;
+  const wash = new THREE.Mesh(new THREE.PlaneGeometry(2.25 * R, 1.5 * R), washMat);
+  wash.position.z = -0.02 * R;
+  root.add(wash);
+  return root;
+}
+
+function createHighwaySatellite(R) {
+  const root = new THREE.Group();
+  root.name = "Starcloud-style lane satellite";
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0xdfe5de,
+    metalness: 0.72,
+    roughness: 0.34
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color: 0x05070a,
+    metalness: 0.42,
+    roughness: 0.52
+  });
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0xbccbd2,
+    metalness: 0.76,
+    roughness: 0.28
+  });
+  const glowMat = makeHighwayMaterial({ color: 0xbefcff, opacity: 0.55 });
+  glowMat.userData.highwayOpacity = 0.55;
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.018 * R, 0.012 * R, 0.014 * R), bodyMat);
+  root.add(body);
+
+  const bus = new THREE.Mesh(new THREE.BoxGeometry(0.026 * R, 0.006 * R, 0.008 * R), frameMat);
+  bus.position.x = 0.002 * R;
+  root.add(bus);
+
+  const panelMat = darkMat.clone();
+  panelMat.side = THREE.DoubleSide;
+  const panelGridMat = makeHighwayMaterial({ color: 0x7befff, opacity: 0.3 });
+  panelGridMat.userData.highwayOpacity = 0.3;
+  const panelW = 0.075 * R;
+  const panelH = 0.024 * R;
+  for (const side of [-1, 1]) {
+    const panel = new THREE.Mesh(new THREE.PlaneGeometry(panelW, panelH, 2, 1), panelMat);
+    panel.position.y = side * 0.028 * R;
+    panel.rotation.x = Math.PI / 2;
+    panel.rotation.z = side * 0.035;
+    addPanelGrid(panel, panelW, panelH, panelGridMat);
+    root.add(panel);
+    const mast = new THREE.Mesh(new THREE.BoxGeometry(0.003 * R, 0.043 * R, 0.003 * R), frameMat);
+    mast.position.y = side * 0.018 * R;
+    root.add(mast);
+  }
+
+  const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.008 * R, 0.003 * R, 0.003 * R, 20), glowMat);
+  dish.rotation.x = Math.PI / 2;
+  dish.position.z = 0.011 * R;
+  root.add(dish);
+
+  return root;
+}
+
+function createHighwayCloseup(scene, R, lane, laneIndex, focusOnObject, interactive, animated, camState, UI) {
+  const theta = lane.phaseOffset + laneIndex * 0.38;
+  const group = new THREE.Group();
+  group.name = `Satellite highway lane ${laneIndex + 1}`;
+  group.visible = false;
+  const atmosphere = createOrbitAtmosphereLayer(R);
+  group.add(atmosphere);
+
+  const anchor = new THREE.Object3D();
+  anchor.name = `Highway lane ${laneIndex + 1} focus`;
+  anchor.position.copy(orbitPoint(lane, theta));
+  scene.add(anchor);
+
+  const focusLane = () => {
+    if (UI) UI.hint.textContent = "Satellite highway close-up. The camera is inside the lane; satellites stay small, with oversized ears visible only at close range.";
+    focusOnObject(anchor, 0.24 * R, {
+      orbitMin: 0.045 * R,
+      orbitMax: 0.95 * R,
+      exitDistance: 1.85 * R
+    });
+  };
+
+  const laneHit = new THREE.Mesh(
+    new THREE.TorusGeometry(lane.radius, 0.08 * R, 8, 180),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+  );
+  laneHit.name = `Clickable satellite highway ${laneIndex + 1}`;
+  laneHit.scale.y = lane.minorRadius / lane.radius;
+  laneHit.quaternion.setFromUnitVectors(baseTorusNormal, laneNormal(lane));
+  addInteractive(
+    interactive,
+    laneHit,
+    `Satellite Highway ${laneIndex + 1}`,
+    focusLane,
+    "Click to enter the close-up traffic lane and inspect future broad-wing satellites"
+  );
+  scene.add(laneHit);
+
+  const corridorMat = makeHighwayMaterial({ color: 0xaefaff, opacity: 0.0 });
+  corridorMat.userData.highwayOpacity = 0.38;
+  const glowMat = makeHighwayMaterial({ color: 0x5be7ff, opacity: 0.0 });
+  glowMat.userData.highwayOpacity = 0.14;
+  const tickMat = makeHighwayMaterial({ color: 0xffffff, opacity: 0.0 });
+  tickMat.userData.highwayOpacity = 0.36;
+
+  const corridor = [];
+  const glow = [];
+  const ticks = [];
+  const segmentSpan = 0.42;
+  for (let i = 0; i < HIGHWAY_SEGMENT_COUNT; i++) {
+    const a = theta - segmentSpan / 2 + (i / HIGHWAY_SEGMENT_COUNT) * segmentSpan;
+    const b = theta - segmentSpan / 2 + ((i + 1) / HIGHWAY_SEGMENT_COUNT) * segmentSpan;
+    corridor.push(...orbitPoint(lane, a).toArray(), ...orbitPoint(lane, b).toArray());
+    tempPoint.copy(orbitPoint(lane, a));
+    tempNext.copy(orbitPoint(lane, a)).normalize().multiplyScalar(0.01 * R);
+    glow.push(...tempPoint.clone().add(tempNext).toArray(), ...orbitPoint(lane, b).add(tempNext).toArray());
+    if (i % 8 === 0) {
+      const center = orbitPoint(lane, a);
+      const radial = center.clone().normalize().multiplyScalar(0.028 * R);
+      ticks.push(...center.clone().sub(radial).toArray(), ...center.clone().add(radial).toArray());
+    }
+  }
+  const corridorGeo = new THREE.BufferGeometry();
+  corridorGeo.setAttribute("position", new THREE.Float32BufferAttribute(corridor, 3));
+  const corridorLines = new THREE.LineSegments(corridorGeo, corridorMat);
+  corridorLines.frustumCulled = false;
+  group.add(corridorLines);
+
+  const glowGeo = new THREE.BufferGeometry();
+  glowGeo.setAttribute("position", new THREE.Float32BufferAttribute(glow, 3));
+  const glowLines = new THREE.LineSegments(glowGeo, glowMat);
+  glowLines.frustumCulled = false;
+  group.add(glowLines);
+
+  const tickGeo = new THREE.BufferGeometry();
+  tickGeo.setAttribute("position", new THREE.Float32BufferAttribute(ticks, 3));
+  const tickLines = new THREE.LineSegments(tickGeo, tickMat);
+  group.add(tickLines);
+
+  const localSatellites = [];
+  const meanSpeed = (TWO_PI / MEAN_ORBIT_PERIOD) * Math.pow((1.1 * R) / lane.radius, 1.5);
+  for (let i = 0; i < HIGHWAY_SATELLITE_COUNT; i++) {
+    const sat = createHighwaySatellite(R);
+    sat.userData.theta = theta - segmentSpan / 2 + (i / HIGHWAY_SATELLITE_COUNT) * segmentSpan;
+    sat.userData.speed = meanSpeed;
+    sat.userData.roll = (swarmRand(laneIndex * 97 + i) - 0.5) * 0.22;
+    localSatellites.push(sat);
+    group.add(sat);
+  }
+
+  group.userData.tick = (t) => {
+    const active = camState.isFocused && camState.focusedObject === anchor;
+    const fade = active ? 1 : 0;
+    group.visible = fade > 0;
+    setHighwayOpacity(group, fade);
+    const anchorTheta = theta + t * meanSpeed;
+    anchor.position.copy(orbitPoint(lane, anchorTheta));
+    tmpRadial.copy(anchor.position).normalize();
+    tmpTangent.copy(laneTangent(lane, anchorTheta));
+    tmpCross.crossVectors(tmpRadial, tmpTangent).normalize();
+    atmosphere.position.copy(anchor.position).addScaledVector(tmpRadial, -0.055 * R);
+    atmosphere.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(tmpTangent, tmpCross, tmpRadial));
+    for (let i = 0; i < localSatellites.length; i++) {
+      const sat = localSatellites[i];
+      const orbitTheta = sat.userData.theta + t * sat.userData.speed;
+      sat.position.copy(orbitPoint(lane, orbitTheta));
+      orientToLane(sat, lane, orbitTheta, sat.userData.roll);
+    }
+  };
+  animated.push(group);
+  scene.add(group);
+}
+
+export function buildSatelliteSwarm(scene, R, interactive, animated, camState, focusOnObject, UI) {
   const lanes = createLanes(R);
   const guides = createLaneGuides(R, lanes);
   const material = new THREE.ShaderMaterial({
@@ -143,5 +438,9 @@ export function buildSatelliteSwarm(scene, R, animated, camState) {
   };
   animated.push(group);
   scene.add(group);
+  const focusStep = Math.max(1, Math.floor(lanes.length / HIGHWAY_FOCUS_COUNT));
+  for (let i = 0; i < HIGHWAY_FOCUS_COUNT; i++) {
+    createHighwayCloseup(scene, R, lanes[i * focusStep], i, focusOnObject, interactive, animated, camState, UI);
+  }
   return group;
 }

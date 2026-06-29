@@ -15,7 +15,7 @@ import { createWalkCamera } from "./walkCamera.js";
 import { buildHub } from "../scenes/hub/index.js";
 import { buildGateway } from "../scenes/gateway.js";
 import { buildMoon } from "../scenes/moon.js";
-import { buildOrbit } from "../scenes/orbit/index.js?v=moon-real-render-1";
+import { buildOrbit } from "../scenes/orbit/index.js?v=satellite-highway-3";
 import { updateConstellation } from "../scenes/orbit/constellation.js?v=guardian-sats-hidden-2";
 import { buildStarcloudScene } from "../scenes/starcloud/index.js";
 import { earthMesh, moonMesh } from "../scenes/orbit/earth.js?v=moon-real-render-1";

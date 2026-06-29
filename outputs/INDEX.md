@@ -50,7 +50,7 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 | orbit/solarsystem.js | Visible Sun, corona glow, co-located directional light, distant planet discs |
 | orbit/constellation.js | Guardian Net Walker swarm — 150 satellites, orbital planes, laser links |
 | orbit/satelliteModel.js | Detailed physical satellite bus model: MLI body, nadir payload, arrays, ADCS, propulsion |
-| orbit/swarm.js | Dense GPU traffic-lane satellite layer, zoom-faded near Earth, non-interactive |
+| orbit/swarm.js | Dense GPU traffic-lane satellite layer, clickable highway close-ups, broad-panel satellite silhouettes |
 | orbit/starcloud.js | Starcloud cluster — solar array, compute modules, inspection massing, habitation silhouettes |
 | orbit/station.js | Gateway exterior — 8-ring expansion station, spokes, rotation, docking hub, PBR pilot surface routing |
 | starcloud/index.js | Starcloud first-person scene orchestration, 1m scale camera setup, sealed sky and Earth backdrop |
@@ -75,6 +75,9 @@ Then open [http://127.0.0.1:8765/index.html](http://127.0.0.1:8765/index.html). 
 
 ## Deleted / retired files
 - `outputs/interactive-aircraft.html` was a stale duplicate. Use `outputs/index.html`.
+
+## Satellite highway close-ups
+The dense Guardian Net layer includes clickable orbital lanes. Selecting a highlighted highway focuses the orbit camera into a magnified corridor where the same lane becomes a glowing traffic path with visible future satellite silhouettes: compact compute bodies with oversized dark solar/radiator "ears" inspired by Starcloud-style orbital infrastructure.
 
 ## Starcloud inspection mode
 When Starcloud Atlas is focused, `ENTER STRUCTURE` appears above the Earth View button. It switches the shared orbit camera into a Starcloud-only inspection sub-state with a local pivot on the structure, `near = 0.01`, `far = 200`, and inspection zoom bounds of `0.05` to `3` scene units. `↺ EXIT STRUCTURE` returns to the normal Starcloud focus view; `↺ EARTH VIEW` still resets to the Earth-orbit camera.

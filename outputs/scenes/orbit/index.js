@@ -8,7 +8,7 @@ import { buildEarth, moonMesh } from "./earth.js?v=moon-real-render-1";
 import { buildSolarSystem } from "./solarsystem.js";
 import { buildStarcloud } from "./starcloud.js";
 import { buildStation } from "./station.js";
-import { buildSatelliteSwarm } from "./swarm.js";
+import { buildSatelliteSwarm } from "./swarm.js?v=satellite-highway-3";
 
 const SHOW_ORBIT_STRUCTURES = false;
 const EARTH_DIAMETER_KM = 12742;
@@ -61,7 +61,7 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   scene.add(moonLight);
 
   buildConstellation(scene, R, interactive, animated, satellites, focusOnObject);
-  buildSatelliteSwarm(scene, R, animated, camState);
+  buildSatelliteSwarm(scene, R, interactive, animated, camState, focusOnObject, UI);
   if (SHOW_ORBIT_STRUCTURES) {
     buildStation(scene, R, interactive, animated, travel);
     const starcloud = buildStarcloud(scene, R, interactive, animated, focusOnObject, camState);
