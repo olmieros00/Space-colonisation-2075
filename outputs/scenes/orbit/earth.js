@@ -104,8 +104,8 @@ export function earthMesh(radius = 8, animated, state) {
 export function moonMesh(radius = 4) {
   const geo = new THREE.SphereGeometry(radius, 160, 80);
   const material = new THREE.MeshStandardMaterial({
-    color: 0x8a8f91,
-    roughness: 0.98,
+    color: 0xb8b8b2,
+    roughness: 0.92,
     metalness: 0
   });
   const moon = new THREE.Mesh(geo, material);
@@ -115,7 +115,7 @@ export function moonMesh(radius = 4) {
   ]).then(([moonMap, reliefMap]) => {
     moon.material.map = moonMap;
     moon.material.bumpMap = reliefMap;
-    moon.material.bumpScale = radius * 0.010;
+    moon.material.bumpScale = radius * 0.004;
     moon.material.needsUpdate = true;
   }).catch(() => {
     // Keep the neutral Moon material if the local texture is unavailable.

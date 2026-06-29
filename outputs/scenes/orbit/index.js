@@ -4,7 +4,7 @@ import { applyHDRIEnvironment } from "../../core/assets.js";
 import { makeEnv } from "../../core/pbr.js";
 import { setOrbit } from "../../core/camera.js";
 import { buildConstellation } from "./constellation.js?v=guardian-sats-hidden-2";
-import { buildEarth, moonMesh } from "./earth.js?v=real-moon-texture-1";
+import { buildEarth, moonMesh } from "./earth.js?v=moon-real-render-1";
 import { buildSolarSystem } from "./solarsystem.js";
 import { buildStarcloud } from "./starcloud.js";
 import { buildStation } from "./station.js";
@@ -18,41 +18,7 @@ const MOON_RADIUS_RATIO = MOON_DIAMETER_KM / EARTH_DIAMETER_KM;
 const MOON_DISTANCE_RATIO = EARTH_MOON_DISTANCE_KM / (EARTH_DIAMETER_KM * 0.5);
 const MOON_DIRECTION = new THREE.Vector3(-0.42, 0.1, -0.9).normalize();
 
-function moonLocatorTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 128;
-  canvas.height = 128;
-  const ctx = canvas.getContext("2d");
-  const gradient = ctx.createRadialGradient(64, 64, 2, 64, 64, 62);
-  gradient.addColorStop(0, "rgba(238,242,236,1)");
-  gradient.addColorStop(0.18, "rgba(238,242,236,0.42)");
-  gradient.addColorStop(0.34, "rgba(172,190,205,0.16)");
-  gradient.addColorStop(1, "rgba(172,190,205,0)");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 128, 128);
-  ctx.strokeStyle = "rgba(238,242,236,0.34)";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(64, 64, 21, 0, Math.PI * 2);
-  ctx.stroke();
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-
 function addMoonLocator(scene, interactive, position, action) {
-  const locator = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: moonLocatorTexture(),
-    transparent: true,
-    opacity: 0.88,
-    depthWrite: false,
-    depthTest: false
-  }));
-  locator.name = "Moon locator";
-  locator.position.copy(position);
-  locator.scale.set(18, 18, 1);
-  scene.add(locator);
-
   const hit = new THREE.Mesh(
     new THREE.SphereGeometry(4.5, 24, 12),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
@@ -69,7 +35,7 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   state.mode = "orbit";
   UI.location.textContent = "EARTH ORBIT // GUARDIAN NET";
   UI.returnBtn.style.display = "block";
-  UI.hint.textContent = "Earth-Moon real scale mode. The distant lunar glint marks the Moon at about 60 Earth radii.";
+  UI.hint.textContent = "Earth-Moon real scale mode. The Moon is small and distant at about 60 Earth radii.";
   addLights(scene, state);
   applyHDRIEnvironment(scene, "space", () => makeEnv(scene, state.renderer, "space"));
   buildSolarSystem(scene, state);
@@ -87,6 +53,9 @@ export function buildOrbit(scene, R, camera, camState, interactive, animated, sa
   addInteractive(interactive, moon, "The Moon", focusMoon, "Mean diameter 3,476 km; average distance from Earth 384,400 km");
   scene.add(moon);
   addMoonLocator(scene, interactive, moon.position, focusMoon);
+  const moonRim = new THREE.PointLight(0xf4f0df, 0.85, 32);
+  moonRim.position.copy(moon.position).add(new THREE.Vector3(0.8 * R, 0.45 * R, 0.8 * R));
+  scene.add(moonRim);
   const moonLight = new THREE.PointLight(0xd0d8e8, 0.4, 120);
   moonLight.position.copy(moon.position);
   scene.add(moonLight);
